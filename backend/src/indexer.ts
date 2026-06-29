@@ -91,46 +91,46 @@ export class EventIndexer {
 
       // Listen to HivemindCore events
       wsHiveCore.on('AgentRegistered', async (wallet: string, name: string, event: ethers.EventLog) => {
-        await this.handleAgentRegistered({ wallet, name, blockNumber: event.blockNumber, transactionHash: event.transactionHash, logIndex: event.index });
+        await this.handleAgentRegistered({ wallet, name, blockNumber: BigInt(event.blockNumber), transactionHash: event.transactionHash, logIndex: event.index });
       });
 
       wsHiveCore.on('TaskCreated', async (taskId: bigint, creator: string, bounty: bigint, event: ethers.EventLog) => {
-        await this.handleTaskCreated({ taskId, creator, bounty, blockNumber: event.blockNumber, transactionHash: event.transactionHash, logIndex: event.index });
-        await this.updateLastProcessedBlock(event.blockNumber);
+        await this.handleTaskCreated({ taskId, creator, bounty, blockNumber: BigInt(event.blockNumber), transactionHash: event.transactionHash, logIndex: event.index });
+        await this.updateLastProcessedBlock(BigInt(event.blockNumber));
       });
 
       wsHiveCore.on('TaskClaimed', async (taskId: bigint, agent: string, event: ethers.EventLog) => {
-        await this.handleTaskClaimed({ taskId, agent, blockNumber: event.blockNumber, transactionHash: event.transactionHash, logIndex: event.index });
+        await this.handleTaskClaimed({ taskId, agent, blockNumber: BigInt(event.blockNumber), transactionHash: event.transactionHash, logIndex: event.index });
       });
 
       wsHiveCore.on('TaskStatusUpdated', async (taskId: bigint, status: number, event: ethers.EventLog) => {
-        await this.handleTaskStatusUpdated({ taskId, status, blockNumber: event.blockNumber, transactionHash: event.transactionHash, logIndex: event.index });
+        await this.handleTaskStatusUpdated({ taskId, status, blockNumber: BigInt(event.blockNumber), transactionHash: event.transactionHash, logIndex: event.index });
       });
 
       wsHiveCore.on('BountyReleased', async (taskId: bigint, totalBounty: bigint, recipients: bigint, event: ethers.EventLog) => {
-        await this.handleBountyReleased({ taskId, totalBounty, recipients, blockNumber: event.blockNumber, transactionHash: event.transactionHash, logIndex: event.index });
+        await this.handleBountyReleased({ taskId, totalBounty, recipients, blockNumber: BigInt(event.blockNumber), transactionHash: event.transactionHash, logIndex: event.index });
       });
 
       // Listen to SwarmExecution events
       wsSwarmExecution.on('AnswerSubmitted', async (submissionId: bigint, taskId: bigint, agent: string, event: ethers.EventLog) => {
-        await this.handleAnswerSubmitted({ submissionId, taskId, agent, blockNumber: event.blockNumber, transactionHash: event.transactionHash, logIndex: event.index });
+        await this.handleAnswerSubmitted({ submissionId, taskId, agent, blockNumber: BigInt(event.blockNumber), transactionHash: event.transactionHash, logIndex: event.index });
       });
 
       wsSwarmExecution.on('SubmissionVerified', async (submissionId: bigint, verified: boolean, event: ethers.EventLog) => {
-        await this.handleSubmissionVerified({ submissionId, verified, blockNumber: event.blockNumber, transactionHash: event.transactionHash, logIndex: event.index });
+        await this.handleSubmissionVerified({ submissionId, verified, blockNumber: BigInt(event.blockNumber), transactionHash: event.transactionHash, logIndex: event.index });
       });
 
       wsSwarmExecution.on('SynthesisComplete', async (taskId: bigint, synthesizer: string, consensusScore: number, event: ethers.EventLog) => {
-        await this.handleSynthesisComplete({ taskId, synthesizer, consensusScore, blockNumber: event.blockNumber, transactionHash: event.transactionHash, logIndex: event.index });
+        await this.handleSynthesisComplete({ taskId, synthesizer, consensusScore, blockNumber: BigInt(event.blockNumber), transactionHash: event.transactionHash, logIndex: event.index });
       });
 
       // Listen to AgentReputation events
       wsAgentReputation.on('ReputationUpdated', async (agent: string, delta: bigint, newReputation: bigint, event: ethers.EventLog) => {
-        await this.handleReputationUpdated({ agent, delta, newReputation, blockNumber: event.blockNumber, transactionHash: event.transactionHash, logIndex: event.index });
+        await this.handleReputationUpdated({ agent, delta, newReputation, blockNumber: BigInt(event.blockNumber), transactionHash: event.transactionHash, logIndex: event.index });
       });
 
       wsAgentReputation.on('BountyDistributed', async (taskId: bigint, totalBounty: bigint, recipients: bigint, event: ethers.EventLog) => {
-        await this.handleBountyDistributed({ taskId, totalBounty, recipients, blockNumber: event.blockNumber, transactionHash: event.transactionHash, logIndex: event.index });
+        await this.handleBountyDistributed({ taskId, totalBounty, recipients, blockNumber: BigInt(event.blockNumber), transactionHash: event.transactionHash, logIndex: event.index });
       });
 
       console.log('[Indexer] Live listener active');
@@ -235,7 +235,7 @@ export class EventIndexer {
         const event: IndexerEvent = {
           name: parsed.name,
           args: parsed.args,
-          blockNumber: log.blockNumber,
+          blockNumber: BigInt(log.blockNumber),
           transactionHash: log.transactionHash,
           logIndex: log.index,
         };

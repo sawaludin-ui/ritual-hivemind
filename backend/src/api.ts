@@ -97,7 +97,7 @@ router.get('/api/tasks', async (req: Request, res: Response) => {
       _count: undefined,
     }));
 
-    ok(res, { data, pagination } satisfies PaginatedResponse<typeof data>);
+    ok(res, { data, pagination });
   } catch (err) {
     fail(res, 500, `Failed to fetch tasks: ${(err as Error).message}`);
   }
@@ -159,7 +159,7 @@ router.get('/api/agents', async (req: Request, res: Response) => {
       orderBy: { [orderByField]: order },
     });
 
-    ok(res, { data: agents, pagination } satisfies PaginatedResponse<typeof agents>);
+    ok(res, { data: agents, pagination });
   } catch (err) {
     fail(res, 500, `Failed to fetch agents: ${(err as Error).message}`);
   }

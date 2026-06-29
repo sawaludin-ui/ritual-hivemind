@@ -73,8 +73,8 @@ export interface ApiResponse<T> {
 export interface AbiEntry {
   type: string;
   name?: string;
-  inputs?: Array<{ name: string; type: string; indexed?: boolean; internalType?: string }>;
-  outputs?: Array<{ name: string; type: string; internalType?: string }>;
+  inputs?: Array<{ name: string; type: string; indexed?: boolean; internalType?: string; components?: Array<{ name: string; type: string; internalType?: string }> }>;
+  outputs?: Array<{ name: string; type: string; internalType?: string; components?: Array<{ name: string; type: string; internalType?: string }> }>;
   stateMutability?: string;
   anonymous?: boolean;
 }
