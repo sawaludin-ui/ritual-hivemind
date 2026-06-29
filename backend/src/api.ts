@@ -20,7 +20,10 @@ function paginate(page: number, limit: number, total: number) {
 }
 
 function ok<T>(res: Response, data: T): void {
-  const body: ApiResponse<T> = { success: true, data };
+  const jsonSafe = JSON.parse(JSON.stringify(data, (_key, value) =>
+    typeof value === 'bigint' ? value.toString() : value,
+  )) as T;
+  const body: ApiResponse<T> = { success: true, data: jsonSafe };
   res.json(body);
 }
 
@@ -203,7 +206,11 @@ router.get('/api/leaderboard', async (req: Request, res: Response) => {
       take: limit,
     });
 
-    ok(res, agents);
+    ok(res, agents.map((agent) => ({
+      ...agent,
+      reputation: agent.reputation.toString(),
+      totalEarned: agent.totalEarned,
+    })));
   } catch (err) {
     fail(res, 500, `Failed to fetch leaderboard: ${(err as Error).message}`);
   }

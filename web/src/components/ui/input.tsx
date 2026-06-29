@@ -16,7 +16,7 @@ export default function Input({ label, error, className = '', ...props }: InputP
       <input
         className={`bg-void border rounded-[12px] px-4 py-3 text-sm text-bone placeholder:text-smoke outline-none transition-colors duration-150 ${
           error ? 'border-swarm-fail' : 'border-border-card focus:border-plum-voltage'
-        } ${className}`}
+        } focus:shadow-[0_0_0_1px_rgba(128,82,255,0.18)] ${className}`}
         {...props}
       />
       {error && <span className="text-[11px] text-swarm-fail mt-0.5">{error}</span>}

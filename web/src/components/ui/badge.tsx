@@ -15,7 +15,7 @@ const styles: Record<string, string> = {
 
 export function Badge({ variant, children }: BadgeProps) {
   return (
-    <span className={`inline-flex items-center px-3 py-0.5 text-xs font-medium rounded-[24px] ${styles[variant] ?? ""}`}>
+    <span className={`inline-flex items-center px-3 py-0.5 text-xs font-medium rounded-[24px] transition-transform duration-150 hover:scale-[1.02] ${styles[variant] ?? ""}`}>
       {children}
     </span>
   );
