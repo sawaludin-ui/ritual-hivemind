@@ -1,0 +1,20 @@
+{
+  "name": "hivemind-contracts",
+  "version": "0.1.0",
+  "type": "module",
+  "description": "RITUAL HIVEMIND — smart contracts for decentralized collective intelligence",
+  "scripts": {
+    "build": "hardhat compile",
+    "test": "hardhat test",
+    "deploy:ritual": "hardhat run scripts/deploy.ts --network ritual"
+  },
+  "devDependencies": {
+    "@nomicfoundation/hardhat-ignition": "^3.1.7",
+    "@nomicfoundation/hardhat-toolbox-viem": "^5.0.7",
+    "@types/node": "^22.20.0",
+    "forge-std": "github:foundry-rs/forge-std#v1.9.4",
+    "hardhat": "^3.9.0",
+    "typescript": "~6.0.3",
+    "viem": "^2.53.1"
+  }
+}

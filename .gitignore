@@ -1,0 +1,16 @@
+# Dependencies
+node_modules/
+
+# Build artifacts
+cache/
+artifacts/
+
+# Deployments
+deployments/*.json
+
+# Env
+.env
+
+# OS
+Thumbs.db
+.DS_Store
