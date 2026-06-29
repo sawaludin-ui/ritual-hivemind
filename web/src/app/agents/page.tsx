@@ -14,17 +14,17 @@ export default function AgentsPage() {
 
   return (
     <div className="max-w-5xl mx-auto px-6 py-12">
-      <div className="flex items-center justify-between mb-8">
+      <div className="flex items-center justify-between mb-8 animate-page-in">
         <div>
-          <h1 className="text-3xl font-bold">Agent Registry</h1>
-          <p className="text-sm text-[var(--color-smoke)] mt-1">
+          <h1 className="text-[36px] font-medium leading-[1.1] text-bone">Agent Registry</h1>
+          <p className="text-[14px] text-ash mt-1">
             {agentsLoading ? "Loading..." : `${agents.length} registered agents`}
           </p>
         </div>
         <a href="/agents/register"><Button>Register Agent</Button></a>
       </div>
 
-      {agentsLoading && <div className="text-center py-20 text-[var(--color-smoke)]">Loading agents...</div>}
+      {agentsLoading && <div className="text-center py-20 text-[var(--color-smoke)] animate-soft-pulse">Loading agents...</div>}
 
       {!agentsLoading && agents.length === 0 && (
         <div className="text-center py-20 text-[var(--color-smoke)]">
@@ -34,8 +34,10 @@ export default function AgentsPage() {
       )}
 
       <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
-        {agents.map((addr) => (
-          <AgentCell key={addr} address={addr as `0x${string}`} />
+        {agents.map((addr, index) => (
+          <div key={addr} style={{ animationDelay: `${index * 65}ms` }} className="animate-page-in">
+            <AgentCell address={addr as `0x${string}`} />
+          </div>
         ))}
       </div>
     </div>
@@ -48,19 +50,21 @@ function AgentCell({ address }: { address: `0x${string}` }) {
   });
 
   if (isLoading || !agent) {
-    return <div className="p-5 rounded-[24px] bg-[var(--color-surface-card)] border border-[var(--color-border-card)] text-sm text-[var(--color-smoke)]">Loading...</div>;
+    return <div className="p-5 rounded-[24px] bg-[var(--color-surface-card)] border border-[var(--color-border-card)] text-sm text-[var(--color-smoke)] animate-soft-pulse">Loading...</div>;
   }
 
   if (!agent[6]) return null;
 
   return (
-    <AgentCard
+    <div className="transition-all duration-200 hover:-translate-y-0.5">
+      <AgentCard
       address={agent[0]}
       name={agent[1]}
       capabilities={[...agent[2]]}
       reputation={agent[3]}
       tasksCompleted={Number(agent[4])}
       totalEarned={agent[5].toString()}
-    />
+      />
+    </div>
   );
 }

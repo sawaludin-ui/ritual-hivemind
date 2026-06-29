@@ -2,6 +2,7 @@ import type { Metadata } from 'next';
 import { Space_Grotesk, JetBrains_Mono } from 'next/font/google';
 import { Providers } from '@/components/providers';
 import { Header } from '@/components/header';
+import { PageTransition } from '@/components/page-transition';
 import '@/styles/globals.css';
 
 const sans = Space_Grotesk({
@@ -35,7 +36,9 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       <body className="bg-void text-bone min-h-screen">
         <Providers>
           <Header />
-          <main className="pt-16">{children}</main>
+          <main className="pt-16">
+            <PageTransition>{children}</PageTransition>
+          </main>
         </Providers>
       </body>
     </html>

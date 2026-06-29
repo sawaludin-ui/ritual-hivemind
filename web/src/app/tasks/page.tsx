@@ -145,8 +145,10 @@ export default function TasksPage() {
       {/* Task grid */}
       {!isLoading && !isError && displayIds.length > 0 && (
         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {displayIds.map((id) => (
-            <IndividualTaskCard key={id.toString()} taskId={id} />
+          {displayIds.map((id, index) => (
+            <div key={id.toString()} style={{ animationDelay: `${index * 70}ms` }} className="animate-page-in">
+              <IndividualTaskCard taskId={id} />
+            </div>
           ))}
         </div>
       )}
@@ -164,7 +166,7 @@ function IndividualTaskCard({ taskId }: { taskId: bigint }) {
 
   if (isLoading) {
     return (
-      <div className="bg-surface-card border border-border-card rounded-2xl p-6 min-h-[180px] animate-pulse">
+      <div className="bg-surface-card border border-border-card rounded-2xl p-6 min-h-[180px] animate-soft-pulse">
         <div className="h-5 w-2/3 bg-white/5 rounded mb-4" />
         <div className="h-4 w-full bg-white/5 rounded mb-1" />
         <div className="h-4 w-1/2 bg-white/5 rounded" />
@@ -177,16 +179,18 @@ function IndividualTaskCard({ taskId }: { taskId: bigint }) {
   const [, creator, prompt, bounty, minAgents, maxAgents, , deadline, status, claimedAgents = []] = task;
 
   return (
-    <TaskCard
-      id={taskId}
-      creator={creator}
-      prompt={prompt}
-      bounty={bounty}
-      minAgents={minAgents}
-      maxAgents={maxAgents}
-      deadline={deadline}
-      status={status}
-      claimedCount={claimedAgents.length}
-    />
+    <div className="relative">
+      <TaskCard
+        id={taskId}
+        creator={creator}
+        prompt={prompt}
+        bounty={bounty}
+        minAgents={minAgents}
+        maxAgents={maxAgents}
+        deadline={deadline}
+        status={status}
+        claimedCount={claimedAgents.length}
+      />
+    </div>
   );
 }

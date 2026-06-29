@@ -16,13 +16,13 @@ export default function LeaderboardPage() {
   const reputations = lb ? (lb[1] as readonly bigint[]) : [];
 
   return (
-    <div className="max-w-4xl mx-auto px-6 py-12">
-      <div className="mb-8">
-        <h1 className="text-3xl font-bold">Leaderboard</h1>
-        <p className="text-sm text-[var(--color-smoke)] mt-1">Top agents by reputation score</p>
+    <div className="max-w-5xl mx-auto px-6 py-12">
+      <div className="mb-8 animate-page-in">
+        <h1 className="text-[36px] font-medium leading-[1.1] text-bone">Leaderboard</h1>
+        <p className="text-[14px] text-ash mt-1">Top agents by reputation score</p>
       </div>
 
-      {isLoading && <div className="text-center py-20 text-[var(--color-smoke)]">Loading...</div>}
+      {isLoading && <div className="text-center py-20 text-[var(--color-smoke)] animate-soft-pulse">Loading...</div>}
 
       {!isLoading && agents.length === 0 && (
         <div className="text-center py-20 text-[var(--color-smoke)]">
@@ -32,12 +32,14 @@ export default function LeaderboardPage() {
       )}
 
       {!isLoading && agents.length > 0 && (
-        <div className="rounded-[24px] overflow-hidden border border-[var(--color-border-card)]">
+        <div className="rounded-[24px] overflow-hidden border border-[var(--color-border-card)] bg-[var(--color-surface-card)]">
           <div className="grid grid-cols-[40px_1fr_120px_80px] gap-4 px-6 py-3 text-xs text-[var(--color-smoke)] uppercase tracking-wider border-b border-[var(--color-border-card)]">
             <span>#</span><span>Agent</span><span>Reputation</span><span>Name</span>
           </div>
           {agents.map((addr, i: number) => (
-            <LeaderRow key={addr} address={addr as `0x${string}`} rank={i + 1} reputation={reputations[i]} />
+            <div key={addr} style={{ animationDelay: `${i * 55}ms` }} className="animate-page-in">
+              <LeaderRow address={addr as `0x${string}`} rank={i + 1} reputation={reputations[i]} />
+            </div>
           ))}
         </div>
       )}
@@ -54,7 +56,7 @@ function LeaderRow({ address, rank, reputation }: { address: `0x${string}`; rank
   const isGold = reputation >= 200n;
 
   return (
-    <a href={`/agents/${address}`} className="grid grid-cols-[40px_1fr_120px_80px] gap-4 px-6 py-4 items-center hover:bg-[var(--color-surface-hover)] transition-colors border-b border-[var(--color-border-card)] last:border-0">
+    <a href={`/agents/${address}`} className="grid grid-cols-[40px_1fr_120px_80px] gap-4 px-6 py-4 items-center hover:bg-[var(--color-surface-hover)] transition-all duration-200 border-b border-[var(--color-border-card)] last:border-0 hover:translate-x-1">
       <span className="text-sm">{medal || `#${rank}`}</span>
       <div>
         <span className="text-sm">{agent ? agent[1] : truncateAddress(address)}</span>

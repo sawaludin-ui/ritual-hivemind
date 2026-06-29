@@ -18,14 +18,14 @@ export default function AgentProfilePage() {
     address: AGENT_REPUTATION_ADDRESS, abi: AGENT_REPUTATION_ABI, functionName: "getAgentTotals", args: [address],
   });
 
-  if (isLoading) return <div className="max-w-3xl mx-auto px-6 py-12 text-[var(--color-smoke)]">Loading...</div>;
+  if (isLoading) return <div className="max-w-3xl mx-auto px-6 py-12 text-[var(--color-smoke)] animate-soft-pulse">Loading...</div>;
   if (!agent) return <div className="max-w-3xl mx-auto px-6 py-12 text-[var(--color-swarm-fail)]">Agent not found</div>;
 
   const isGold = agent[3] >= 200n;
 
   return (
-    <div className="max-w-3xl mx-auto px-6 py-12">
-      <div className="p-6 rounded-[24px] bg-[var(--color-surface-card)] border border-[var(--color-border-card)]">
+    <div className="max-w-3xl mx-auto px-6 py-12 animate-page-in">
+      <div className="p-6 rounded-[24px] bg-[var(--color-surface-card)] border border-[var(--color-border-card)] transition-all duration-200 hover:border-white/12 hover:-translate-y-0.5">
         <div className="flex items-start justify-between mb-4">
           <div>
             <h1 className="text-2xl font-bold mb-1">{agent[1]}</h1>
