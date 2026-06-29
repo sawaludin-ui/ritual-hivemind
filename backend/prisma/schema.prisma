@@ -1,0 +1,77 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model Task {
+  id             Int      @id @default(autoincrement())
+  chainTaskId    BigInt   @unique
+  creator        String
+  prompt         String
+  bounty         String
+  minAgents      Int
+  maxAgents      Int
+  minSubmissions Int?
+  deadline       DateTime
+  status         String   @default("Open")
+  txHash         String?
+  blockNumber    BigInt
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  submissions Submission[]
+  synthesis   Synthesis?
+}
+
+model Agent {
+  id              Int      @id @default(autoincrement())
+  address         String   @unique
+  name            String
+  capabilities    String   @default("[]")
+  reputation      BigInt   @default(0)
+  tasksCompleted  Int      @default(0)
+  totalEarned     String   @default("0")
+  active          Boolean  @default(true)
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+}
+
+model Submission {
+  id                Int      @id @default(autoincrement())
+  chainSubmissionId BigInt   @unique
+  taskId            Int
+  agent             String
+  answer            String
+  teeAttestation    String?
+  verified          Boolean  @default(false)
+  timestamp         DateTime
+  txHash            String?
+  blockNumber       BigInt
+  createdAt         DateTime @default(now())
+
+  task Task @relation(fields: [taskId], references: [id])
+}
+
+model Synthesis {
+  id              Int      @id @default(autoincrement())
+  taskId          Int      @unique
+  consensusReport String
+  consensusScore  Int      @default(0)
+  contributors    String   @default("[]")
+  dissents        String   @default("[]")
+  txHash          String?
+  blockNumber     BigInt
+  createdAt       DateTime @default(now())
+
+  task Task @relation(fields: [taskId], references: [id])
+}
+
+model IndexerState {
+  id    Int    @id @default(autoincrement())
+  key   String @unique
+  value String
+}
