@@ -7,8 +7,9 @@ import "./interfaces/IHivemindCore.sol";
 import "./interfaces/ITeeVerifier.sol";
 import "./utils/Owned.sol";
 import "./utils/ReentrancyGuardLite.sol";
+import "./utils/PrecompileConsumer.sol";
 
-contract SwarmExecution is Owned, ReentrancyGuardLite {
+contract SwarmExecution is Owned, ReentrancyGuardLite, PrecompileConsumer {
     struct Submission {
         uint256 id;
         uint256 taskId;
@@ -130,7 +131,7 @@ contract SwarmExecution is Owned, ReentrancyGuardLite {
         emit SubmissionVerified(submissionId, verified);
     }
 
-    function synthesize(uint256 taskId) external nonReentrant {
+    function synthesize(uint256 taskId, bytes calldata llmPayload) external nonReentrant {
         (
             uint256 _taskId,
             ,
@@ -188,9 +189,22 @@ contract SwarmExecution is Owned, ReentrancyGuardLite {
             }
         }
 
-        string memory consensusReport = _composeConsensusReport(prompt, submissionIds);
-        if (block.chainid == 1979) {
-            consensusReport = _callLLM(consensusReport);
+        // On Ritual chain, run the LLM precompile to synthesize the consensus.
+        // The llmPayload is constructed OFF-CHAIN by the caller using the same
+        // data the contract verified above, then encoded in the Ritual LLM
+        // precompile ABI format (model config + messages + params).
+        // The contract delegates to the precompile and stores the result.
+        //
+        // SECURITY NOTE: The llmPayload is provided by the caller, but the
+        // contract has already verified the on-chain submission integrity.
+        // The precompile result is informational (consensus report) — the
+        // critical on-chain state (reputation, bounties) is determined by
+        // the verified submissions, not the LLM output.
+        string memory consensusReport;
+        if (block.chainid == 1979 && llmPayload.length > 0) {
+            consensusReport = _callLLM(llmPayload);
+        } else {
+            consensusReport = _composeConsensusReport(prompt, submissionIds);
         }
 
         uint256[] memory payouts = reputation.distributeBounty(taskId, contributors, weights, bounty);
@@ -233,14 +247,6 @@ contract SwarmExecution is Owned, ReentrancyGuardLite {
             output = abi.encodePacked(output, "- ", _addressToString(submission.agent), ": ", submission.answer, "\n");
         }
         return string(output);
-    }
-
-    function _callLLM(string memory prompt) internal returns (string memory) {
-        (bool ok, bytes memory result) = address(0x0802).call(abi.encode(prompt));
-        if (!ok || result.length == 0) {
-            return prompt;
-        }
-        return abi.decode(result, (string));
     }
 
     function _isClaimed(address[] memory claimedAgents, address agent) internal pure returns (bool) {

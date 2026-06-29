@@ -1,9 +1,12 @@
+import { config } from "dotenv";
+config();
+
 import hardhatToolboxViemPlugin from "@nomicfoundation/hardhat-toolbox-viem";
 import hardhatViem from "@nomicfoundation/hardhat-viem";
 import hardhatViemAssertions from "@nomicfoundation/hardhat-viem-assertions";
 import hardhatNodeTestRunner from "@nomicfoundation/hardhat-node-test-runner";
 import hardhatNetworkHelpers from "@nomicfoundation/hardhat-network-helpers";
-import { configVariable, defineConfig } from "hardhat/config";
+import { defineConfig } from "hardhat/config";
 
 export default defineConfig({
   plugins: [
@@ -55,15 +58,15 @@ export default defineConfig({
     sepolia: {
       type: "http",
       chainType: "l1",
-      url: configVariable("SEPOLIA_RPC_URL"),
-      accounts: [configVariable("SEPOLIA_PRIVATE_KEY")],
+      url: process.env.SEPOLIA_RPC_URL ?? "https://sepolia.drpc.org",
+      accounts: process.env.SEPOLIA_PRIVATE_KEY ? [process.env.SEPOLIA_PRIVATE_KEY] : [process.env.DEPLOYER_PRIVATE_KEY].filter(Boolean),
     },
     ritual: {
       type: "http",
       chainType: "l1",
       url: "https://rpc.ritualfoundation.org",
       chainId: 1979,
-      accounts: [configVariable("DEPLOYER_PRIVATE_KEY")],
+      accounts: [process.env.DEPLOYER_PRIVATE_KEY],
     },
   },
 });

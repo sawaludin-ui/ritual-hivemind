@@ -149,7 +149,7 @@ describe("SwarmExecution", () => {
         account: f.bob.account,
       });
       await f.viem.assertions.revertWithCustomError(
-        f.swarm.write.synthesize([id], { account: f.dave.account }),
+        f.swarm.write.synthesize([id, "0x"], { account: f.dave.account }),
         f.swarm,
         "NotEnoughVerifiedSubmissions",
       );
@@ -172,7 +172,7 @@ describe("SwarmExecution", () => {
         account: f.bob.account,
       });
 
-      const tx = await f.swarm.write.synthesize([id], {
+      const tx = await f.swarm.write.synthesize([id, "0x"], {
         account: f.dave.account,
       });
       await f.viem.assertions.emit(tx, f.swarm, "SynthesisComplete");
@@ -210,7 +210,7 @@ describe("SwarmExecution", () => {
         account: f.bob.account,
       });
 
-      await f.swarm.write.synthesize([id], { account: f.dave.account });
+      await f.swarm.write.synthesize([id, "0x"], { account: f.dave.account });
 
       // Both verified contributors rewarded (+10): 100 -> 110.
       assert.equal(
@@ -248,7 +248,7 @@ describe("SwarmExecution", () => {
       const carolBefore = await f.reputation.read.getReputation([
         f.carol.account.address,
       ]);
-      await f.swarm.write.synthesize([id], { account: f.dave.account });
+      await f.swarm.write.synthesize([id, "0x"], { account: f.dave.account });
 
       // Alice + Bob rewarded (+10): 100 -> 110.
       assert.equal(

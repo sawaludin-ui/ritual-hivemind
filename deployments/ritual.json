@@ -1,0 +1,12 @@
+{
+  "chainId": "1979",
+  "deployedAt": "2026-06-29T04:30:21.400Z",
+  "deployer": "0x04e276CFaFF694424Fc55327c5FbE7f7FEFD12fE",
+  "teeVerifier": "0x0000000000000000000000000000000000000000",
+  "agentReputation": "0x884132e3bFC2c8A64f2f5DF32be0512b0B903D49",
+  "hivemindCore": "0xa5284207c3DA247D2c986c8434d6c0336Aa7d725",
+  "swarmExecution": "0x937B181538Bd5dFDA8FFe62D82652CC4129F8F08",
+  "ritualWallet": "0x532F0dF0896F353d8C3DD8cc134e8129DA2a3948",
+  "ritualWalletBalanceETH": "0.203085",
+  "explorerUrl": "https://explorer.ritualfoundation.org/"
+}
