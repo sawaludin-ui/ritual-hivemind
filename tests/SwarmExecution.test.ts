@@ -34,7 +34,7 @@ describe("SwarmExecution", () => {
 
   /** Creates a task (min=1,max=3) funded with `bounty`, returns its id. */
   async function createTask(bounty = parseEther("3")) {
-    await f.core.write.createTask(["What is 2+2?", 1, 3, deadline], {
+    await f.core.write.createTask(["What is 2+2?", 1, 3, 0, deadline], {
       account: f.dave.account,
       value: bounty,
     });
@@ -134,7 +134,7 @@ describe("SwarmExecution", () => {
   describe("synthesize", () => {
     it("reverts if not enough verified submissions (below minAgents)", async () => {
       // min=2 task, only 1 valid submission.
-      await f.core.write.createTask(["Need two", 2, 2, deadline], {
+      await f.core.write.createTask(["Need two", 2, 2, 0, deadline], {
         account: f.dave.account,
         value: parseEther("2"),
       });
@@ -157,7 +157,7 @@ describe("SwarmExecution", () => {
 
     it("completes synthesis, distributes bounty, marks task Complete", async () => {
       const bounty = parseEther("2");
-      await f.core.write.createTask(["Solve", 2, 2, deadline], {
+      await f.core.write.createTask(["Solve", 2, 2, 0, deadline], {
         account: f.dave.account,
         value: bounty,
       });
@@ -179,7 +179,7 @@ describe("SwarmExecution", () => {
 
       // Task should be Complete (status enum index 3).
       const task = await f.core.read.getTask([id]);
-      assert.equal(task[7], 3);
+      assert.equal(task[8], 3); // status idx 8 (after minSubmissions); Complete == 3
 
       // Synthesis record stored.
       const synth = await f.swarm.read.getSynthesis([id]);
@@ -195,7 +195,7 @@ describe("SwarmExecution", () => {
 
     it("rewards every verified contributor with +10 reputation", async () => {
       const bounty = parseEther("2");
-      await f.core.write.createTask(["Solve", 2, 2, deadline], {
+      await f.core.write.createTask(["Solve", 2, 2, 0, deadline], {
         account: f.dave.account,
         value: bounty,
       });
@@ -223,15 +223,43 @@ describe("SwarmExecution", () => {
       );
     });
 
-    // KNOWN DESIGN ISSUE (flagged to Dimas 2026-06-29):
-    // The non-submitter penalty loop in synthesize() is currently UNREACHABLE.
-    // synthesize() reverts with NotEnoughVerifiedSubmissions whenever
-    // verifiedCount < minAgents. Since a claimed-but-not-submitted agent reduces
-    // verifiedCount below minAgents, synthesis can never run in that scenario,
-    // so the `-1` penalty for claimed-non-submitters is dead code.
-    // FIX OPTIONS: (a) decouple submission threshold from claim threshold, or
-    // (b) drop minAgents check in favor of a dedicated minSubmissions param.
-    // Skipping the penalty assertion until the design is resolved.
-    it.skip("penalizes claimed-but-non-submitting agents (blocked by design issue)", () => {});
+    it("penalizes claimed-but-non-submitting agents (design #2 fixed)", async () => {
+      // FIXED design #2: minSubmissions is decoupled from minAgents.
+      // Task: min=3 agents claim, but minSubmissions=2 so synthesis can run with
+      // only 2 verified answers. Carol claims but never submits -> penalized -1.
+      const bounty = parseEther("2");
+      await f.core.write.createTask(["Solve", 3, 3, 2, deadline], {
+        account: f.dave.account,
+        value: bounty,
+      });
+      const id = await f.core.read.taskCount();
+
+      await f.core.write.claimTask([id], { account: f.alice.account });
+      await f.core.write.claimTask([id], { account: f.bob.account });
+      await f.core.write.claimTask([id], { account: f.carol.account });
+      await f.swarm.write.submitAnswer([id, "4", VALID_ATTESTATION], {
+        account: f.alice.account,
+      });
+      await f.swarm.write.submitAnswer([id, "4", VALID_ATTESTATION], {
+        account: f.bob.account,
+      });
+      // Carol does NOT submit.
+
+      const carolBefore = await f.reputation.read.getReputation([
+        f.carol.account.address,
+      ]);
+      await f.swarm.write.synthesize([id], { account: f.dave.account });
+
+      // Alice + Bob rewarded (+10): 100 -> 110.
+      assert.equal(
+        await f.reputation.read.getReputation([f.alice.account.address]),
+        110n,
+      );
+      // Carol penalized for claiming but not submitting (-1).
+      const carolAfter = await f.reputation.read.getReputation([
+        f.carol.account.address,
+      ]);
+      assert.equal(carolAfter, carolBefore - 1n);
+    });
   });
 });

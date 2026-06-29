@@ -68,6 +68,7 @@ contract SwarmExecution is Owned, ReentrancyGuardLite {
             ,
             ,
             ,
+            ,
             uint64 deadline,
             HivemindTypes.TaskStatus status,
             address[] memory claimedAgents,
@@ -135,8 +136,9 @@ contract SwarmExecution is Owned, ReentrancyGuardLite {
             ,
             string memory prompt,
             uint256 bounty,
-            uint8 minAgents,
+            ,
             uint8 maxAgents,
+            uint8 minSubmissions,
             ,
             HivemindTypes.TaskStatus status,
             address[] memory claimedAgents,
@@ -153,7 +155,11 @@ contract SwarmExecution is Owned, ReentrancyGuardLite {
                 verifiedCount++;
             }
         }
-        if (verifiedCount < minAgents || verifiedCount > maxAgents) {
+        // Synthesis requires at least minSubmissions verified answers (decoupled
+        // from minAgents, the claim threshold). This makes the non-submitter
+        // penalty path reachable: agents can claim and fail to submit without
+        // blocking synthesis, and get penalized below.
+        if (verifiedCount < minSubmissions || verifiedCount > maxAgents) {
             revert NotEnoughVerifiedSubmissions();
         }
 

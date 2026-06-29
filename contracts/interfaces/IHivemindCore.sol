@@ -10,6 +10,7 @@ interface IHivemindCore {
         string calldata prompt,
         uint8 minAgents,
         uint8 maxAgents,
+        uint8 minSubmissions,
         uint64 deadline
     ) external payable returns (uint256 taskId);
 
@@ -33,6 +34,7 @@ interface IHivemindCore {
             uint256 bounty,
             uint8 minAgents,
             uint8 maxAgents,
+            uint8 minSubmissions,
             uint64 deadline,
             HivemindTypes.TaskStatus status,
             address[] memory claimedAgents,

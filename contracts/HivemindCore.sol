@@ -15,6 +15,7 @@ contract HivemindCore is Owned, ReentrancyGuardLite, IHivemindCore {
         uint256 bounty;
         uint8 minAgents;
         uint8 maxAgents;
+        uint8 minSubmissions;
         uint64 deadline;
         HivemindTypes.TaskStatus status;
         address[] claimedAgents;
@@ -95,10 +96,15 @@ contract HivemindCore is Owned, ReentrancyGuardLite, IHivemindCore {
         string calldata prompt,
         uint8 minAgents,
         uint8 maxAgents,
+        uint8 minSubmissions,
         uint64 deadline
     ) external payable override returns (uint256 taskId) {
         if (msg.value == 0) revert InvalidBounty();
         if (minAgents == 0 || maxAgents < minAgents) revert InvalidTaskWindow();
+        // minSubmissions must be reachable: between 1 and minAgents (the guaranteed
+        // claimers). 0 is treated as "default to minAgents" for convenience.
+        uint8 effectiveMinSubs = minSubmissions == 0 ? minAgents : minSubmissions;
+        if (effectiveMinSubs > minAgents) revert InvalidTaskWindow();
         if (deadline <= block.timestamp) revert TaskExpired();
 
         taskId = ++_taskCount;
@@ -109,6 +115,7 @@ contract HivemindCore is Owned, ReentrancyGuardLite, IHivemindCore {
         task.bounty = msg.value;
         task.minAgents = minAgents;
         task.maxAgents = maxAgents;
+        task.minSubmissions = effectiveMinSubs;
         task.deadline = deadline;
         task.status = HivemindTypes.TaskStatus.Open;
 
@@ -120,13 +127,21 @@ contract HivemindCore is Owned, ReentrancyGuardLite, IHivemindCore {
     function claimTask(uint256 taskId) external override {
         Task storage task = _tasks[taskId];
         if (task.id == 0) revert TaskNotFound();
-        if (task.status != HivemindTypes.TaskStatus.Open) revert TaskNotOpen();
+        // Claims are accepted while the task is still gathering agents: both Open
+        // (below minAgents) and Executing (min reached, slots remain) qualify.
+        // This lets a task fill its full min..max window instead of locking at min.
+        if (
+            task.status != HivemindTypes.TaskStatus.Open &&
+            task.status != HivemindTypes.TaskStatus.Executing
+        ) revert TaskNotOpen();
         if (task.deadline <= block.timestamp) revert TaskExpired();
         if (!_agents[msg.sender].active) revert AgentNotRegistered();
         if (task.claimedAgents.length >= task.maxAgents) revert TaskFull();
         if (_isClaimed(task.claimedAgents, msg.sender)) revert AlreadyClaimed();
 
         task.claimedAgents.push(msg.sender);
+        // Once enough agents have committed, signal that execution can begin.
+        // Status stays Executing while remaining slots (up to maxAgents) fill.
         if (task.claimedAgents.length >= task.minAgents && task.status == HivemindTypes.TaskStatus.Open) {
             task.status = HivemindTypes.TaskStatus.Executing;
         }
@@ -175,6 +190,7 @@ contract HivemindCore is Owned, ReentrancyGuardLite, IHivemindCore {
             uint256 bounty,
             uint8 minAgents,
             uint8 maxAgents,
+            uint8 minSubmissions,
             uint64 deadline,
             HivemindTypes.TaskStatus status,
             address[] memory claimedAgents,
@@ -191,6 +207,7 @@ contract HivemindCore is Owned, ReentrancyGuardLite, IHivemindCore {
             task.bounty,
             task.minAgents,
             task.maxAgents,
+            task.minSubmissions,
             task.deadline,
             task.status,
             task.claimedAgents,
