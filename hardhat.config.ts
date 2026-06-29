@@ -1,8 +1,18 @@
 import hardhatToolboxViemPlugin from "@nomicfoundation/hardhat-toolbox-viem";
+import hardhatViem from "@nomicfoundation/hardhat-viem";
+import hardhatViemAssertions from "@nomicfoundation/hardhat-viem-assertions";
+import hardhatNodeTestRunner from "@nomicfoundation/hardhat-node-test-runner";
+import hardhatNetworkHelpers from "@nomicfoundation/hardhat-network-helpers";
 import { configVariable, defineConfig } from "hardhat/config";
 
 export default defineConfig({
-  plugins: [hardhatToolboxViemPlugin],
+  plugins: [
+    hardhatToolboxViemPlugin,
+    hardhatViem,
+    hardhatViemAssertions,
+    hardhatNodeTestRunner,
+    hardhatNetworkHelpers,
+  ],
   paths: {
     sources: "./contracts",
     tests: "./tests",
