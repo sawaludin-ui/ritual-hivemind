@@ -8,6 +8,7 @@ import Card from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import Input from '@/components/ui/input';
+import { SwarmViewer } from '@/components/swarm-viewer';
 import { truncateAddress, formatDeadline, formatEtherDisplay } from '@/lib/utils';
 import {
   HIVEMIND_CORE_ADDRESS,
@@ -133,10 +134,11 @@ export default function SwarmViewerPage() {
       </Link>
 
       <div className="mb-8">
-        <div className="flex items-center gap-3 mb-3">
+        <div className="flex flex-wrap items-center gap-3 mb-3">
           <Badge variant={statusInfo.variant}>{statusInfo.label}</Badge>
-          <span className="text-[14px] text-bounty font-medium">
-            {formatEtherDisplay(bounty)} ETH bounty
+          <span className="text-[14px] text-bounty font-medium">{formatEtherDisplay(bounty)} ETH bounty</span>
+          <span className="text-[12px] text-smoke">
+            {deadlineStr} {isExpired && '(Expired)'}
           </span>
         </div>
         <h1 className="text-[36px] font-medium leading-[1.1] text-bone">
@@ -145,20 +147,13 @@ export default function SwarmViewerPage() {
       </div>
 
       <div className="mb-8">
-        <div className="flex items-center justify-between text-xs text-smoke mb-2">
-          <span>
-            Agents: {claimedAgents.length}/{maxAgents.toString()}
-          </span>
-          <span>
-            {deadlineStr} {isExpired && '(Expired)'}
-          </span>
-        </div>
-        <div className="w-full h-1 bg-white/6 rounded-full overflow-hidden">
-          <div
-            className="h-full bg-plum-voltage rounded-full transition-all duration-600 ease-out"
-            style={{ width: `${Math.min(progressPercent, 100)}%` }}
-          />
-        </div>
+        <SwarmViewer
+          taskId={taskId}
+          prompt={prompt}
+          deadline={deadline}
+          claimedAgents={claimedAgents}
+          status={status}
+        />
       </div>
 
       <Card className="mb-8">
