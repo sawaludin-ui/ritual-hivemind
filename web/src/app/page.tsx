@@ -20,7 +20,7 @@ export default function LandingPage() {
               </div>
 
               {/* Display headline — 78px weight 400 */}
-              <h1 className="text-5xl-2 text-bone tracking-tight-display">
+              <h1 className="text-display text-bone tracking-tight-display">
                 Collective intelligence, verified on-chain.
               </h1>
 

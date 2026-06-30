@@ -24,38 +24,40 @@ const config: Config = {
         acronym: ['Satoshi', 'Acronym', 'system-ui', 'sans-serif'],
       },
       fontSize: {
-        // Exact from tokens JSON
-        "xs": ["12px", { lineHeight: "1.5", fontWeight: "400" }],
-        "xs-2": ["12px", { lineHeight: "1", fontWeight: "600" }],
+        // Exact 8-step scale from tokens JSON
+        // Each entry: [size, { lineHeight, letterSpacing, fontWeight }]
+        "caption": ["12px", { lineHeight: "1.5", letterSpacing: "0.05px" }],
+        "body-sm": ["14px", { lineHeight: "1.5", letterSpacing: "0.05px" }],
+        "subheading": ["18px", { lineHeight: "1.5", letterSpacing: "0.025px" }],
+        "heading-sm": ["24px", { lineHeight: "1.3", letterSpacing: "0.021px" }],
+        "heading": ["36px", { lineHeight: "1.2", letterSpacing: "0.021px" }],
+        "heading-lg": ["48px", { lineHeight: "1.1", letterSpacing: "-0.04px" }],
+        "display": ["78px", { lineHeight: "0.9", letterSpacing: "-0.04px" }],
+        "hero": ["113px", { lineHeight: "0.81", letterSpacing: "-0.04px" }],
+        
+        // Extra utility sizes (not in token file, for UI components)
         "xs-3": ["12px", { lineHeight: "1.2", fontWeight: "600" }],
-        "sm": ["14px", { lineHeight: "1.2", fontWeight: "600" }],
-        base: ["15px", { lineHeight: "1.5", fontWeight: "400" }],
+        "sm-2": ["14px", { lineHeight: "1.2", fontWeight: "400" }],
+        "base": ["15px", { lineHeight: "1.5" }],
         "base-2": ["15px", { lineHeight: "1.5", fontWeight: "600" }],
-        lg: ["18px", { lineHeight: "1.5", fontWeight: "200" }],
         "lg-2": ["18px", { lineHeight: "1.5", fontWeight: "400" }],
-        "2xl": ["24px", { lineHeight: "1.5", fontWeight: "700" }],
         "2xl-2": ["24px", { lineHeight: "1.25", fontWeight: "400" }],
         "2xl-3": ["27px", { lineHeight: "1", fontWeight: "400" }],
-        "4xl": ["36px", { lineHeight: "1.2", fontWeight: "400" }],
         "4xl-2": ["42px", { lineHeight: "1.2", fontWeight: "400" }],
-        "5xl": ["48px", { lineHeight: "1.1", fontWeight: "400" }],
-        "5xl-2": ["78px", { lineHeight: "1.1", fontWeight: "400" }],
-        "5xl-3": ["78px", { lineHeight: "0.9", fontWeight: "400" }],
-        "5xl-4": ["113px", { lineHeight: "1.1", fontWeight: "400" }],
       },
       letterSpacing: {
-        tightest: "-0.04em",
-        body: "0.021em",
-        nav: "0.021em",
-        wide: "0.05em",
-        caps: "0.08em",
+        // Exact from tokens — these are PX values, not em
+        "tight-display": "-0.04px",
+        "body": "0.021px",
+        "nav": "0.021px",
+        "subheading": "0.025px",
+        "wide": "0.05px",
+        "caption": "0.05px",
+        "caps": "0.08em", // only caps uses em (uppercase labels)
       },
       borderRadius: {
         "3xl": "24px",
         pill: "24px",
-        card: "16px",
-        input: "12px",
-        tooltip: "8px",
       },
       spacing: {
         18: "18px",
