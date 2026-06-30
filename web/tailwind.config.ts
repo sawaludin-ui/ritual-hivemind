@@ -65,7 +65,7 @@ const config: Config = {
         120: "120px",
       },
       maxWidth: {
-        page: "1400px",
+        page: "1200px",
         content: "680px",
       },
       transitionDuration: {
