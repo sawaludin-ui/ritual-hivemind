@@ -5,12 +5,11 @@ import Link from "next/link";
 import { useReadContract } from "wagmi";
 import { TaskCard } from "@/components/task-card";
 import { Button } from "@/components/ui/button";
-import Input from "@/components/ui/input";
 import {
   HIVEMIND_CORE_ADDRESS,
   HIVEMIND_CORE_ABI,
 } from "@/lib/contracts";
-import { Plus, Eye, EyeSlash } from "@phosphor-icons/react";
+import { Plus } from "@phosphor-icons/react";
 
 const STATUS_FILTERS = [
   { label: "All", value: "all" },
@@ -45,10 +44,10 @@ export default function TasksPage() {
         {/* Header */}
         <div className="flex items-start justify-between mb-8">
           <div>
-            <h1 className="text-[36px] font-medium leading-[1.1] text-bone">
+            <h1 className="text-4xl text-bone tracking-tight-display">
               Task Board
             </h1>
-            <p className="text-[14px] text-ash mt-1">
+            <p className="text-base text-ash mt-1">
               Browse open tasks or create a new one for the swarm
             </p>
           </div>
@@ -67,10 +66,10 @@ export default function TasksPage() {
               <button
                 key={f.value}
                 onClick={() => setStatusFilter(f.value)}
-                className={`text-xs font-medium tracking-[0.05em] uppercase px-4 py-2 rounded-pill transition-all duration-150 ${
+                className={`text-xs-3 tracking-caps uppercase px-4 py-2 rounded-3xl transition-all duration-150 ${
                   statusFilter === f.value
                     ? "bg-plum-voltage/10 text-plum-voltage border border-plum-voltage/30"
-                    : "text-smoke border border-border-card hover:text-bone hover:border-white/[0.12]"
+                    : "text-smoke border border-white/[0.08] hover:text-bone hover:border-white/[0.12]"
                 }`}
               >
                 {f.label}
@@ -78,24 +77,25 @@ export default function TasksPage() {
             ))}
           </div>
           <div className="sm:ml-auto w-full sm:w-64">
-            <Input
+            <input
               placeholder="Search tasks..."
               value={search}
               onChange={(e) => setSearch(e.target.value)}
+              className="w-full bg-void border border-white/[0.08] rounded-3xl px-4 py-3 text-base text-bone placeholder:text-smoke outline-none transition-colors focus:border-plum-voltage"
             />
           </div>
         </div>
 
-        {/* Loading state */}
+        {/* Loading state — full skeleton grid */}
         {isLoading && (
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6 stagger">
             {Array.from({ length: 6 }).map((_, i) => (
               <div
                 key={i}
-                className="bg-surface-card border border-border-card rounded-card p-6 min-h-[200px]"
+                className="border border-white/[0.08] rounded-3xl p-6 min-h-[200px]"
               >
                 <div className="flex justify-between mb-4">
-                  <div className="h-6 w-16 rounded-pill skeleton" />
+                  <div className="h-6 w-16 rounded-3xl skeleton" />
                   <div className="h-5 w-20 rounded skeleton" />
                 </div>
                 <div className="h-5 w-3/4 rounded skeleton mb-3" />
@@ -112,15 +112,15 @@ export default function TasksPage() {
 
         {/* Empty state */}
         {!isLoading && allTaskIds.length === 0 && (
-          <div className="flex flex-col items-center justify-center py-20 text-center">
-            <div className="w-20 h-20 mx-auto mb-6 rounded-full border border-border-card flex items-center justify-center">
+          <div className="flex flex-col items-center justify-center py-120 text-center">
+            <div className="w-20 h-20 mx-auto mb-6 rounded-full border border-white/[0.08] flex items-center justify-center">
               <svg width="32" height="32" viewBox="0 0 32 32" className="text-smoke">
                 <circle cx="16" cy="16" r="14" fill="none" stroke="currentColor" strokeWidth="1" />
                 <circle cx="16" cy="16" r="4" fill="none" stroke="currentColor" strokeWidth="1" />
               </svg>
             </div>
-            <h3 className="text-[18px] font-semibold text-bone mb-2">No tasks yet</h3>
-            <p className="text-[14px] text-ash max-w-[360px] mb-6 leading-relaxed">
+            <h3 className="text-2xl-2 text-bone mb-2">No tasks yet</h3>
+            <p className="text-base text-ash max-w-[360px] mb-6 leading-relaxed">
               Be the first to submit a task and activate the swarm. Your questions fuel
               collective intelligence.
             </p>
@@ -153,9 +153,9 @@ function IndividualTaskCard({ taskId }: { taskId: bigint }) {
 
   if (isLoading) {
     return (
-      <div className="bg-surface-card border border-border-card rounded-card p-6 min-h-[200px]">
+      <div className="border border-white/[0.08] rounded-3xl p-6 min-h-[200px]">
         <div className="flex justify-between mb-4">
-          <div className="h-6 w-16 rounded-pill skeleton" />
+          <div className="h-6 w-16 rounded-3xl skeleton" />
           <div className="h-5 w-20 rounded skeleton" />
         </div>
         <div className="h-5 w-3/4 rounded skeleton mb-3" />

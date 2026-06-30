@@ -32,7 +32,6 @@ export function Header() {
       <nav className="mx-auto max-w-page px-6 h-full flex items-center justify-between">
         {/* Logo */}
         <Link href="/" className="flex items-center gap-2.5 group" aria-label="HIVEMIND home">
-          {/* Particle constellation emblem */}
           <svg width="28" height="28" viewBox="0 0 28 28" className="text-plum-voltage transition-transform duration-300 group-hover:scale-110">
             <circle cx="6" cy="8" r="2" fill="currentColor" />
             <circle cx="14" cy="5" r="1.5" fill="currentColor" opacity="0.6" />
@@ -45,7 +44,7 @@ export function Header() {
             <line x1="22" y1="10" x2="20" y2="20" stroke="currentColor" strokeWidth="0.5" opacity="0.3" />
             <line x1="10" y1="18" x2="20" y2="20" stroke="currentColor" strokeWidth="0.5" opacity="0.2" />
           </svg>
-          <span className="text-[24px] font-light tracking-[-0.04em] text-bone">
+          <span className="text-2xl-2 text-bone tracking-tight-display">
             HIVEMIND
           </span>
         </Link>
@@ -56,7 +55,7 @@ export function Header() {
             <Link
               key={link.href}
               href={link.href}
-              className={`relative text-[14px] tracking-[0.021em] transition-colors duration-150 ${
+              className={`relative text-sm tracking-nav transition-colors duration-150 ${
                 isActive(link.href)
                   ? "text-bone"
                   : "text-smoke hover:text-bone"
@@ -98,7 +97,7 @@ export function Header() {
               <Link
                 key={link.href}
                 href={link.href}
-                className={`text-[16px] tracking-[0.021em] transition-colors ${
+                className={`text-base tracking-nav transition-colors ${
                   isActive(link.href) ? "text-plum-voltage" : "text-ash hover:text-bone"
                 }`}
               >

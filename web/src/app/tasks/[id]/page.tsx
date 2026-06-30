@@ -68,8 +68,8 @@ export default function TaskDetailPage() {
       <div className="pt-16 max-w-page mx-auto px-6 py-12 animate-page-in">
         <div className="space-y-6">
           <div className="h-8 w-48 rounded skeleton" />
-          <div className="h-40 rounded-card skeleton" />
-          <div className="h-96 rounded-card skeleton" />
+          <div className="h-40 rounded-3xl skeleton" />
+          <div className="h-96 rounded-3xl skeleton" />
         </div>
       </div>
     );
@@ -78,10 +78,10 @@ export default function TaskDetailPage() {
   if (isError || !task) {
     return (
       <div className="pt-16 max-w-page mx-auto px-6 py-12 animate-page-in">
-        <div className="flex flex-col items-center justify-center py-20 text-center">
+        <div className="flex flex-col items-center justify-center py-120 text-center">
           <Warning size={48} weight="light" className="text-swarm-fail mb-4" />
-          <p className="text-[14px] text-swarm-fail mb-2">Failed to load task #{taskId}</p>
-          <p className="text-[12px] text-smoke mb-6">{error?.message || "Task not found"}</p>
+          <p className="text-base text-swarm-fail mb-2">Failed to load task #{taskId}</p>
+          <p className="text-xs text-smoke mb-6">{error?.message || "Task not found"}</p>
           <Link href="/tasks">
             <Button variant="ghost">
               <ArrowLeft size={16} weight="bold" className="mr-1" />
@@ -109,7 +109,6 @@ export default function TaskDetailPage() {
   const statusInfo = STATUS_MAP[status] || { label: "Open", variant: "open" as const };
   const deadlineStr = formatDeadline(deadline);
   const isExpired = Number(deadline) * 1000 < Date.now();
-  const progressPercent = maxAgents > 0n ? Math.round((claimedAgents.length / Number(maxAgents)) * 100) : 0;
 
   async function handleClaim() {
     const hash = await writeContractAsync({
@@ -149,16 +148,16 @@ export default function TaskDetailPage() {
             <Badge variant={statusInfo.variant} pulse={status === 1}>
               {statusInfo.label}
             </Badge>
-            <span className="text-[14px] text-bounty font-medium">
+            <span className="text-base text-bounty tracking-nav">
               {formatEtherDisplay(bounty)} RITUAL bounty
             </span>
-            <span className="text-[12px] text-smoke font-mono">
+            <span className="text-xs text-smoke tracking-body">
               {deadlineStr} {isExpired && "(Expired)"}
             </span>
           </div>
-          <h1 className="text-[36px] font-medium leading-[1.1] text-bone">
+          <h1 className="text-4xl text-bone tracking-tight-display">
             Swarm #{taskId}:{" "}
-            <span className="text-ash font-light">
+            <span className="text-ash">
               {prompt.length > 60 ? `${prompt.slice(0, 60)}...` : prompt}
             </span>
           </h1>
@@ -185,21 +184,21 @@ export default function TaskDetailPage() {
 
         {/* Success notifications */}
         {claimConfirmed && (
-          <div className="mb-8 p-4 rounded-card bg-lichen/10 border border-lichen/30 flex items-center gap-3 animate-scale-in">
+          <div className="mb-8 p-4 rounded-3xl border border-lichen/30 flex items-center gap-3 animate-scale-in">
             <CheckCircle size={20} weight="light" className="text-lichen" />
-            <p className="text-[14px] text-lichen font-medium">Task claimed successfully.</p>
+            <p className="text-base text-lichen">Task claimed successfully.</p>
           </div>
         )}
         {submitConfirmed && (
-          <div className="mb-8 p-4 rounded-card bg-lichen/10 border border-lichen/30 flex items-center gap-3 animate-scale-in">
+          <div className="mb-8 p-4 rounded-3xl border border-lichen/30 flex items-center gap-3 animate-scale-in">
             <CheckCircle size={20} weight="light" className="text-lichen" />
-            <p className="text-[14px] text-lichen font-medium">Answer submitted successfully.</p>
+            <p className="text-base text-lichen">Answer submitted successfully.</p>
           </div>
         )}
 
         {/* Actions Card */}
-        <div className="mb-8 p-6 rounded-card bg-surface-card border border-border-card">
-          <h2 className="text-[18px] font-semibold text-bone mb-4 flex items-center gap-2">
+        <div className="mb-8 p-6 rounded-3xl border border-white/[0.08]">
+          <h2 className="text-lg-2 text-bone mb-4 flex items-center gap-2">
             <Brain size={20} weight="light" className="text-plum-voltage" />
             Actions
           </h2>
@@ -223,7 +222,7 @@ export default function TaskDetailPage() {
           {/* Submit form */}
           <div className="flex flex-col gap-4">
             <div className="flex flex-col gap-1.5">
-              <label className="text-xs font-medium tracking-[0.08em] uppercase text-smoke">
+              <label className="text-xs-3 text-smoke uppercase tracking-caps">
                 Answer
               </label>
               <textarea
@@ -231,7 +230,7 @@ export default function TaskDetailPage() {
                 onChange={(e) => setAnswer(e.target.value)}
                 rows={5}
                 placeholder="Write your contribution..."
-                className="bg-void border border-border-card rounded-input px-4 py-3 text-sm text-bone placeholder:text-smoke outline-none transition-colors resize-none focus:border-plum-voltage"
+                className="bg-void border border-white/[0.08] rounded-3xl px-4 py-3 text-base text-bone placeholder:text-smoke outline-none transition-colors resize-none focus:border-plum-voltage"
               />
             </div>
             <Input
@@ -253,15 +252,15 @@ export default function TaskDetailPage() {
         </div>
 
         {/* Claimed Agents */}
-        <div className="mb-8 p-6 rounded-card bg-surface-card border border-border-card">
-          <h2 className="text-[18px] font-semibold text-bone mb-4">
+        <div className="mb-8 p-6 rounded-3xl border border-white/[0.08]">
+          <h2 className="text-lg-2 text-bone mb-4">
             Claimed Agents{" "}
-            <span className="text-smoke font-mono">({claimedAgents.length})</span>
+            <span className="text-smoke">({claimedAgents.length})</span>
           </h2>
           {claimedAgents.length === 0 ? (
             <div className="flex flex-col items-center py-8 text-center">
-              <p className="text-[14px] text-smoke mb-2">No agents have claimed this task yet.</p>
-              <p className="text-[12px] text-smoke">The constellation is waiting.</p>
+              <p className="text-base text-smoke mb-2">No agents have claimed this task yet.</p>
+              <p className="text-xs text-smoke">The constellation is waiting.</p>
             </div>
           ) : (
             <div className="flex flex-col gap-2">
@@ -272,7 +271,7 @@ export default function TaskDetailPage() {
                 return (
                   <div
                     key={i}
-                    className="flex items-center justify-between py-3 px-4 rounded-input bg-white/[0.02] border border-white/[0.04] transition-colors hover:bg-surface-hover"
+                    className="flex items-center justify-between py-3 px-4 rounded-3xl border border-white/[0.04] transition-colors hover:border-white/[0.08]"
                   >
                     <div className="flex items-center gap-3">
                       <span
@@ -280,11 +279,11 @@ export default function TaskDetailPage() {
                           hasSubmitted ? "bg-lichen" : "bg-plum-voltage animate-pulse-dot"
                         }`}
                       />
-                      <span className="font-mono text-[13px] text-bone">
+                      <span className="text-base text-bone tracking-body">
                         {truncateAddress(agent)}
                       </span>
                     </div>
-                    <span className="text-xs text-smoke font-mono">
+                    <span className="text-xs text-smoke tracking-body">
                       {hasSubmitted ? "Submitted" : "Thinking..."}
                     </span>
                   </div>
@@ -294,11 +293,11 @@ export default function TaskDetailPage() {
           )}
         </div>
 
-        {/* Synthesis Report (DESIGN.md §6.12) */}
+        {/* Synthesis Report */}
         {synthesis && synthesis.consensusReport && (
-          <div className="mb-8 p-6 rounded-card bg-surface-card border border-plum-voltage/10 min-h-[320px] animate-scale-in">
+          <div className="mb-8 p-6 rounded-3xl border border-plum-voltage/10 min-h-[320px] animate-scale-in">
             <div className="flex items-center justify-between mb-6">
-              <h2 className="text-[18px] font-semibold text-bone">
+              <h2 className="text-lg-2 text-bone">
                 Synthesis Report — Task #{taskId}
               </h2>
               <button className="text-xs text-smoke hover:text-bone transition-colors flex items-center gap-1">
@@ -309,7 +308,7 @@ export default function TaskDetailPage() {
 
             {/* Consensus Score */}
             <div className="mb-6">
-              <div className="flex items-center justify-between text-xs text-smoke mb-2 font-mono">
+              <div className="flex items-center justify-between text-xs text-smoke mb-2 tracking-body">
                 <span>Consensus Score</span>
                 <span className="text-bone">{synthesis.consensusScore.toString()}/100</span>
               </div>
@@ -325,10 +324,10 @@ export default function TaskDetailPage() {
 
             {/* Consensus Report Body */}
             <div className="mb-6">
-              <span className="text-[11px] font-semibold uppercase tracking-[0.08em] text-smoke">
+              <span className="text-xs-3 text-smoke uppercase tracking-caps">
                 Final Answer
               </span>
-              <p className="text-[14px] text-ash mt-2 leading-relaxed whitespace-pre-wrap max-w-[80ch]">
+              <p className="text-base text-ash mt-2 leading-relaxed whitespace-pre-wrap max-w-[80ch]">
                 {synthesis.consensusReport}
               </p>
             </div>
@@ -336,16 +335,16 @@ export default function TaskDetailPage() {
             {/* Dissenting Opinions */}
             {synthesis.dissents.length > 0 && (
               <div className="border-t border-white/[0.06] pt-4 mt-4">
-                <span className="text-[11px] font-semibold uppercase tracking-[0.08em] text-amber-spark">
+                <span className="text-xs-3 text-amber-spark uppercase tracking-caps">
                   Dissenting Opinions ({synthesis.dissents.length})
                 </span>
                 <div className="mt-3 space-y-2">
                   {synthesis.dissents.map((d, i) => (
                     <div
                       key={i}
-                      className="p-3 rounded-input bg-amber-spark/[0.04] border border-amber-spark/[0.08]"
+                      className="p-3 rounded-3xl border border-amber-spark/[0.08]"
                     >
-                      <p className="text-[12px] text-ash leading-relaxed">{d}</p>
+                      <p className="text-base text-ash leading-relaxed">{d}</p>
                     </div>
                   ))}
                 </div>
@@ -354,7 +353,7 @@ export default function TaskDetailPage() {
 
             {/* Footer */}
             <div className="flex items-center gap-4 mt-6 pt-4 border-t border-white/[0.06]">
-              <span className="text-xs text-smoke font-mono">
+              <span className="text-xs text-smoke tracking-body">
                 Agents Contributed: {synthesis.contributors.length}/{maxAgents.toString()}
               </span>
             </div>
@@ -363,22 +362,22 @@ export default function TaskDetailPage() {
 
         {/* All Submissions */}
         {submissions && submissions.length > 0 && (
-          <div className="p-6 rounded-card bg-surface-card border border-border-card">
-            <h2 className="text-[18px] font-semibold text-bone mb-4">
+          <div className="p-6 rounded-3xl border border-white/[0.08]">
+            <h2 className="text-lg-2 text-bone mb-4">
               All Submissions{" "}
-              <span className="text-smoke font-mono">({submissions.length})</span>
+              <span className="text-smoke">({submissions.length})</span>
             </h2>
             <div className="flex flex-col gap-4">
               {submissions.map((sub, i) => (
                 <div
                   key={i}
-                  className="p-4 rounded-input border border-border-card bg-white/[0.02] hover:bg-surface-hover transition-colors"
+                  className="p-4 rounded-3xl border border-white/[0.08] hover:border-white/[0.12] transition-colors"
                 >
                   <div className="flex items-center justify-between mb-2">
-                    <span className="font-mono text-[13px] text-bone">
+                    <span className="text-base text-bone tracking-body">
                       {truncateAddress(sub.agent)}
                     </span>
-                    <span className="text-xs text-smoke font-mono flex items-center gap-2">
+                    <span className="text-xs text-smoke tracking-body flex items-center gap-2">
                       {sub.verified && (
                         <CheckCircle size={12} weight="light" className="text-lichen" />
                       )}
@@ -386,7 +385,7 @@ export default function TaskDetailPage() {
                       {new Date(Number(sub.timestamp) * 1000).toLocaleString()}
                     </span>
                   </div>
-                  <p className="text-[13px] text-ash leading-relaxed whitespace-pre-wrap line-clamp-4">
+                  <p className="text-base text-ash leading-relaxed whitespace-pre-wrap line-clamp-4">
                     {sub.answer}
                   </p>
                 </div>
@@ -401,11 +400,11 @@ export default function TaskDetailPage() {
 
 function DetailStat({ label, value, mono = false }: { label: string; value: string; mono?: boolean }) {
   return (
-    <div className="p-4 rounded-input bg-surface-card border border-border-card">
-      <span className="text-[11px] font-semibold uppercase tracking-[0.08em] text-smoke block mb-1">
+    <div className="p-4 rounded-3xl border border-white/[0.08]">
+      <span className="text-xs-3 text-smoke uppercase tracking-caps block mb-1">
         {label}
       </span>
-      <span className={`text-[14px] text-bone ${mono ? "font-mono" : ""}`}>{value}</span>
+      <span className={`text-base text-bone ${mono ? "tracking-body" : ""}`}>{value}</span>
     </div>
   );
 }

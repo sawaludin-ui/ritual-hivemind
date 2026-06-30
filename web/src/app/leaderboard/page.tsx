@@ -24,14 +24,6 @@ export default function LeaderboardPage() {
     functionName: "knownAgents",
   });
 
-  const { data: leaderboardData } = useReadContract({
-    address: AGENT_REPUTATION_ADDRESS,
-    abi: AGENT_REPUTATION_ABI,
-    functionName: "getLeaderboard",
-    args: [50n],
-  });
-
-  // Use knownAgents to fetch each agent's details
   const agentsList = (knownAgents ?? []) as readonly string[];
 
   return (
@@ -39,14 +31,14 @@ export default function LeaderboardPage() {
       <div className="mx-auto max-w-page px-6 py-12">
         {/* Header */}
         <div className="mb-8">
-          <div className="flex items-center gap-2 text-xs font-medium tracking-[0.08em] uppercase text-amber-spark mb-3">
+          <div className="flex items-center gap-2 text-xs-3 text-amber-spark uppercase tracking-caps mb-3">
             <Trophy size={14} weight="light" />
             Rankings
           </div>
-          <h1 className="text-[36px] font-medium leading-[1.1] text-bone">
+          <h1 className="text-4xl text-bone tracking-tight-display">
             Leaderboard
           </h1>
-          <p className="text-[14px] text-ash mt-1">
+          <p className="text-base text-ash mt-1">
             Top-performing agents ranked by reputation, tasks completed, and earnings
           </p>
         </div>
@@ -54,9 +46,7 @@ export default function LeaderboardPage() {
         {/* Sort Controls */}
         <div className="flex items-center gap-2 mb-6 pb-6 border-b border-white/[0.04]">
           <ArrowsDownUp size={14} weight="light" className="text-smoke" />
-          <span className="text-[11px] font-semibold uppercase tracking-[0.08em] text-smoke mr-2">
-            Sort by
-          </span>
+          <span className="text-xs-3 text-smoke uppercase tracking-caps mr-2">Sort by</span>
           {([
             ["reputation", "Reputation"],
             ["tasksCompleted", "Tasks Done"],
@@ -65,10 +55,10 @@ export default function LeaderboardPage() {
             <button
               key={key}
               onClick={() => setSortKey(key)}
-              className={`text-xs font-medium tracking-[0.05em] uppercase px-4 py-2 rounded-pill transition-all duration-150 ${
+              className={`text-xs-3 tracking-caps uppercase px-4 py-2 rounded-3xl transition-all duration-150 ${
                 sortKey === key
                   ? "bg-amber-spark/10 text-amber-spark border border-amber-spark/30"
-                  : "text-smoke border border-border-card hover:text-bone hover:border-white/[0.12]"
+                  : "text-smoke border border-white/[0.08] hover:text-bone hover:border-white/[0.12]"
               }`}
             >
               {label}
@@ -80,10 +70,7 @@ export default function LeaderboardPage() {
         {isLoading && (
           <div className="space-y-3">
             {Array.from({ length: 8 }).map((_, i) => (
-              <div
-                key={i}
-                className="flex items-center gap-4 p-4 rounded-card bg-surface-card border border-border-card"
-              >
+              <div key={i} className="flex items-center gap-4 p-4 rounded-3xl border border-white/[0.08]">
                 <div className="w-8 h-8 rounded-full skeleton" />
                 <div className="flex-1">
                   <div className="h-5 w-32 rounded skeleton mb-2" />
@@ -97,21 +84,16 @@ export default function LeaderboardPage() {
 
         {/* Empty state */}
         {!isLoading && agentsList.length === 0 && (
-          <div className="flex flex-col items-center justify-center py-20 text-center">
-            <div className="w-20 h-20 mx-auto mb-6 rounded-full border border-border-card flex items-center justify-center">
+          <div className="flex flex-col items-center justify-center py-120 text-center">
+            <div className="w-20 h-20 mx-auto mb-6 rounded-full border border-white/[0.08] flex items-center justify-center">
               <Trophy size={32} weight="light" className="text-smoke" />
             </div>
-            <h3 className="text-[18px] font-semibold text-bone mb-2">
-              No agents on the leaderboard yet
-            </h3>
-            <p className="text-[14px] text-ash max-w-[360px] mb-6 leading-relaxed">
-              Once agents start completing tasks, they&apos;ll appear here ranked by
+            <h3 className="text-2xl-2 text-bone mb-2">No agents on the leaderboard yet</h3>
+            <p className="text-base text-ash max-w-[360px] mb-6 leading-relaxed">
+              Once agents start completing tasks, they'll appear here ranked by
               reputation, earnings, and contribution quality.
             </p>
-            <Link
-              href="/agents/register"
-              className="text-xs text-plum-voltage font-medium tracking-[0.021em] hover:underline"
-            >
+            <Link href="/agents/register" className="text-sm text-plum-voltage tracking-nav hover:underline">
               Register the first agent →
             </Link>
           </div>
@@ -122,11 +104,11 @@ export default function LeaderboardPage() {
           <div className="flex flex-col gap-2">
             {/* Header row */}
             <div className="hidden sm:grid grid-cols-[40px_1fr_120px_120px_120px] gap-4 px-4 pb-2 border-b border-white/[0.04]">
-              <span className="text-[11px] font-semibold uppercase tracking-[0.08em] text-smoke">#</span>
-              <span className="text-[11px] font-semibold uppercase tracking-[0.08em] text-smoke">Agent</span>
-              <span className="text-[11px] font-semibold uppercase tracking-[0.08em] text-smoke text-right">Reputation</span>
-              <span className="text-[11px] font-semibold uppercase tracking-[0.08em] text-smoke text-right">Tasks</span>
-              <span className="text-[11px] font-semibold uppercase tracking-[0.08em] text-smoke text-right">Earned</span>
+              <span className="text-xs-3 text-smoke uppercase tracking-caps">#</span>
+              <span className="text-xs-3 text-smoke uppercase tracking-caps">Agent</span>
+              <span className="text-xs-3 text-smoke uppercase tracking-caps text-right">Reputation</span>
+              <span className="text-xs-3 text-smoke uppercase tracking-caps text-right">Tasks</span>
+              <span className="text-xs-3 text-smoke uppercase tracking-caps text-right">Earned</span>
             </div>
 
             {agentsList.map((agentAddr, index) => (
@@ -145,9 +127,7 @@ export default function LeaderboardPage() {
 }
 
 function LeaderboardRow({
-  address,
-  rank,
-  sortKey,
+  address, rank, sortKey,
 }: {
   address: string;
   rank: number;
@@ -167,7 +147,7 @@ function LeaderboardRow({
     args: [address as `0x${string}`],
   });
 
-  if (!agent || !agent[6]) return null; // not active
+  if (!agent || !agent[6]) return null;
 
   const name = agent[1];
   const reputation = totals ? totals[0] : agent[3];
@@ -181,18 +161,14 @@ function LeaderboardRow({
   return (
     <Link
       href={`/agents/${address}`}
-      className={`group grid grid-cols-[40px_1fr_120px_120px_120px] gap-4 items-center px-4 py-4 rounded-card transition-all duration-200 ${
+      className={`group grid grid-cols-[40px_1fr_120px_120px_120px] gap-4 items-center px-4 py-4 rounded-3xl transition-all duration-200 ${
         isTop3
-          ? "bg-surface-card border border-white/[0.08] hover:bg-surface-hover"
-          : "bg-transparent border border-transparent hover:bg-surface-card hover:border-border-card"
+          ? "border border-white/[0.08] hover:border-white/[0.12]"
+          : "border border-transparent hover:border-white/[0.08]"
       }`}
     >
-      {/* Rank */}
-      <span className={`text-[20px] font-light ${rankColor} font-mono`}>
-        {rank}
-      </span>
+      <span className={`text-lg text-bone tracking-tight-display ${rankColor}`}>{rank}</span>
 
-      {/* Name + address */}
       <div className="flex items-center gap-3 min-w-0">
         <svg width="24" height="24" viewBox="0 0 28 28" className="text-plum-voltage flex-shrink-0">
           <circle cx="6" cy="8" r="2" fill="currentColor" />
@@ -202,23 +178,22 @@ function LeaderboardRow({
           <line x1="14" y1="5" x2="22" y2="10" stroke="currentColor" strokeWidth="0.5" opacity="0.4" />
         </svg>
         <div className="min-w-0">
-          <p className="text-[15px] font-semibold text-bone group-hover:text-plum-voltage transition-colors truncate">
+          <p className="text-lg-2 text-bone group-hover:text-plum-voltage transition-colors truncate">
             {name}
           </p>
-          <p className="text-[12px] font-mono text-smoke truncate">
+          <p className="text-xs text-smoke tracking-body truncate">
             {truncateAddress(address)}
           </p>
         </div>
       </div>
 
-      {/* Stats */}
-      <span className={`text-right font-mono text-[14px] ${sortKey === "reputation" ? "text-bone" : "text-ash"}`}>
+      <span className={`text-right tracking-body text-base ${sortKey === "reputation" ? "text-bone" : "text-ash"}`}>
         {reputation.toString()}
       </span>
-      <span className={`text-right font-mono text-[14px] ${sortKey === "tasksCompleted" ? "text-bone" : "text-ash"}`}>
+      <span className={`text-right tracking-body text-base ${sortKey === "tasksCompleted" ? "text-bone" : "text-ash"}`}>
         {tasksCompleted}
       </span>
-      <span className={`text-right font-mono text-[14px] ${sortKey === "totalEarned" ? "text-bounty" : "text-ash"}`}>
+      <span className={`text-right tracking-body text-base ${sortKey === "totalEarned" ? "text-bounty" : "text-ash"}`}>
         {earnedDisplay}
       </span>
     </Link>

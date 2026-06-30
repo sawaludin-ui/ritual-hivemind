@@ -37,11 +37,11 @@ export default function AgentProfilePage() {
       <div className="pt-16 max-w-page mx-auto px-6 py-12 animate-page-in">
         <div className="space-y-6">
           <div className="h-4 w-32 rounded skeleton" />
-          <div className="h-32 w-full rounded-card skeleton" />
+          <div className="h-32 w-full rounded-3xl skeleton" />
           <div className="grid sm:grid-cols-3 gap-4">
-            <div className="h-24 rounded-card skeleton" />
-            <div className="h-24 rounded-card skeleton" />
-            <div className="h-24 rounded-card skeleton" />
+            <div className="h-24 rounded-3xl skeleton" />
+            <div className="h-24 rounded-3xl skeleton" />
+            <div className="h-24 rounded-3xl skeleton" />
           </div>
         </div>
       </div>
@@ -51,10 +51,10 @@ export default function AgentProfilePage() {
   if (isError || !agent) {
     return (
       <div className="pt-16 max-w-page mx-auto px-6 py-12 animate-page-in">
-        <div className="flex flex-col items-center justify-center py-20 text-center">
+        <div className="flex flex-col items-center justify-center py-120 text-center">
           <Warning size={48} weight="light" className="text-swarm-fail mb-4" />
-          <p className="text-[14px] text-swarm-fail mb-2">Agent not found</p>
-          <p className="text-[12px] text-smoke mb-6">
+          <p className="text-base text-swarm-fail mb-2">Agent not found</p>
+          <p className="text-xs text-smoke mb-6">
             {truncateAddress(address)} is not registered in the swarm.
           </p>
           <Link href="/agents">
@@ -75,10 +75,7 @@ export default function AgentProfilePage() {
   return (
     <div className="pt-16 animate-page-in">
       <div className="mx-auto max-w-page px-6 py-12">
-        <Link
-          href="/agents"
-          className="text-xs text-smoke hover:text-bone transition-colors mb-6 inline-flex items-center gap-1"
-        >
+        <Link href="/agents" className="text-xs text-smoke hover:text-bone transition-colors mb-6 inline-flex items-center gap-1">
           <ArrowLeft size={14} weight="bold" />
           Back to Agents
         </Link>
@@ -87,7 +84,7 @@ export default function AgentProfilePage() {
         <div className="flex flex-col sm:flex-row sm:items-start gap-6 mb-12">
           {/* Avatar */}
           <div className="flex-shrink-0">
-            <div className="w-20 h-20 rounded-card border border-border-card bg-surface-card flex items-center justify-center">
+            <div className="w-20 h-20 rounded-3xl border border-white/[0.08] flex items-center justify-center">
               <svg width="48" height="48" viewBox="0 0 48 48" className="text-plum-voltage">
                 <circle cx="12" cy="15" r="3.5" fill="currentColor" />
                 <circle cx="30" cy="9" r="3" fill="currentColor" opacity="0.6" />
@@ -103,26 +100,19 @@ export default function AgentProfilePage() {
 
           <div className="flex-1">
             <div className="flex items-center gap-3 mb-2">
-              <h1 className="text-[36px] font-medium leading-[1.1] text-bone">
+              <h1 className="text-4xl text-bone tracking-tight-display">
                 {name}
               </h1>
               {active ? (
-                <Badge variant="active" pulse>
-                  Active
-                </Badge>
+                <Badge variant="active" pulse>Active</Badge>
               ) : (
                 <Badge variant="idle">Inactive</Badge>
               )}
             </div>
-            <p className="text-[13px] font-mono text-smoke mb-4">
-              {address}
-            </p>
+            <p className="text-base text-smoke tracking-body mb-4">{address}</p>
             <div className="flex flex-wrap items-center gap-2">
               {capabilities.map((cap) => (
-                <span
-                  key={cap}
-                  className="text-xs px-3 py-1 rounded-pill bg-surface-hover text-ash font-mono"
-                >
+                <span key={cap} className="text-xs px-3 py-1 rounded-3xl border border-white/[0.08] text-ash tracking-body">
                   {cap}
                 </span>
               ))}
@@ -159,15 +149,15 @@ export default function AgentProfilePage() {
           />
         </div>
 
-        {/* Activity section (placeholder for future indexer data) */}
-        <div className="p-6 rounded-card bg-surface-card border border-border-card">
-          <h2 className="text-[18px] font-semibold text-bone mb-4 flex items-center gap-2">
+        {/* Activity section */}
+        <div className="p-6 rounded-3xl border border-white/[0.08]">
+          <h2 className="text-lg-2 text-bone mb-4 flex items-center gap-2">
             <Robot size={20} weight="light" className="text-plum-voltage" />
             Recent Activity
           </h2>
           <div className="flex flex-col items-center py-8 text-center">
-            <p className="text-[14px] text-smoke mb-2">No recent activity tracked yet.</p>
-            <p className="text-[12px] text-smoke">
+            <p className="text-base text-smoke mb-2">No recent activity tracked yet.</p>
+            <p className="text-xs text-smoke">
               Activity will appear once the indexer starts processing on-chain events.
             </p>
           </div>
@@ -178,10 +168,7 @@ export default function AgentProfilePage() {
 }
 
 function StatCard({
-  icon,
-  label,
-  value,
-  sublabel,
+  icon, label, value, sublabel,
 }: {
   icon: React.ReactNode;
   label: string;
@@ -189,15 +176,13 @@ function StatCard({
   sublabel: string;
 }) {
   return (
-    <div className="p-6 rounded-card bg-surface-card border border-border-card hover:border-white/[0.12] transition-colors">
+    <div className="p-6 rounded-3xl border border-white/[0.08] hover:border-white/[0.12] transition-colors">
       <div className="flex items-center gap-2 mb-3">
         {icon}
-        <span className="text-[11px] font-semibold uppercase tracking-[0.08em] text-smoke">
-          {label}
-        </span>
+        <span className="text-xs-3 text-smoke uppercase tracking-caps">{label}</span>
       </div>
-      <p className="text-[28px] font-light text-bone tracking-[-0.04em]">{value}</p>
-      <p className="text-[12px] text-smoke mt-1">{sublabel}</p>
+      <p className="text-2xl-3 text-bone tracking-tight-display">{value}</p>
+      <p className="text-xs text-smoke mt-1">{sublabel}</p>
     </div>
   );
 }

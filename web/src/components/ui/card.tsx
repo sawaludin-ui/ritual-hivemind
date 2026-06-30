@@ -12,10 +12,9 @@ export function Card({ children, className = "", hover = false, active = false }
   return (
     <div
       className={clsx(
-        "bg-surface-card border rounded-card p-6 transition-all duration-150 ease-out",
-        hover && "hover:bg-surface-hover hover:-translate-y-0.5 hover:border-white/[0.12]",
-        active && "border-border-active bg-plum-voltage/[0.08]",
-        !active && "border-border-card",
+        "border rounded-3xl p-6 transition-all duration-150 ease-out",
+        hover && "hover:-translate-y-0.5 hover:border-white/[0.12]",
+        active ? "border-plum-voltage/30" : "border-white/[0.08]",
         className,
       )}
     >

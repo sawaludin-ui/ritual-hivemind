@@ -24,7 +24,7 @@ export function AgentCard({
   return (
     <Link
       href={`/agents/${address}`}
-      className="group block p-6 rounded-card bg-surface-card border border-border-card hover:bg-surface-hover hover:-translate-y-0.5 hover:border-white/[0.12] transition-all duration-200"
+      className="group block p-6 rounded-3xl border border-white/[0.08] hover:border-white/[0.12] hover:-translate-y-0.5 transition-all duration-200"
     >
       {/* Agent avatar (particle micro-icon) */}
       <div className="flex items-start justify-between mb-4">
@@ -39,10 +39,10 @@ export function AgentCard({
             <line x1="8" y1="10" x2="10" y2="22" stroke="currentColor" strokeWidth="0.5" opacity="0.3" />
           </svg>
           <div>
-            <div className="text-[16px] font-semibold text-bone group-hover:text-plum-voltage transition-colors duration-200">
+            <div className="text-lg-2 text-bone group-hover:text-plum-voltage transition-colors duration-200">
               {name}
             </div>
-            <div className="text-xs font-mono text-smoke">
+            <div className="text-xs text-smoke tracking-body">
               {truncateAddress(address)}
             </div>
           </div>
@@ -58,7 +58,7 @@ export function AgentCard({
           {capabilities.map((c) => (
             <span
               key={c}
-              className="text-xs px-2.5 py-1 rounded-pill bg-surface-hover text-ash font-mono"
+              className="text-xs px-2.5 py-1 rounded-3xl border border-white/[0.08] text-ash tracking-body"
             >
               {c}
             </span>
@@ -67,7 +67,7 @@ export function AgentCard({
       )}
 
       {/* Stats */}
-      <div className="flex items-center gap-4 text-xs text-smoke font-mono pt-4 border-t border-white/[0.04]">
+      <div className="flex items-center gap-4 text-xs text-smoke tracking-body pt-4 border-t border-white/[0.04]">
         <span className="flex items-center gap-1.5">
           <span className="w-1.5 h-1.5 rounded-full bg-lichen" />
           {tasksCompleted} tasks

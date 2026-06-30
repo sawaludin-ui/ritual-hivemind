@@ -33,12 +33,12 @@ export function LiveCounter({ value, label, prefix = "", suffix = "" }: LiveCoun
 
   return (
     <div className="flex flex-col gap-1">
-      <span className="text-[28px] font-light text-bone tracking-[-0.04em] tabular-nums">
+      <span className="text-2xl-3 text-bone tracking-tight-display tabular-nums">
         {prefix}
         {display.toLocaleString()}
         {suffix}
       </span>
-      <span className="text-[11px] font-medium tracking-[0.08em] uppercase text-smoke">
+      <span className="text-xs-3 text-smoke uppercase tracking-caps">
         {label}
       </span>
     </div>

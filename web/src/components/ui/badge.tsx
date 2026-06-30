@@ -29,7 +29,7 @@ export function Badge({ variant, children, pulse = false }: BadgeProps) {
   return (
     <span
       className={clsx(
-        "inline-flex items-center gap-1.5 px-3 py-0.5 text-xs font-medium tracking-[0.021em] rounded-pill transition-transform duration-150",
+        "inline-flex items-center gap-1.5 px-3 py-0.5 text-xs-3 tracking-nav rounded-3xl transition-transform duration-150",
         styles[variant],
       )}
     >

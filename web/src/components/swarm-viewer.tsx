@@ -120,13 +120,6 @@ export function SwarmViewer({
         ctx.stroke();
       }
 
-      // Center pulse
-      ctx.beginPath();
-      ctx.strokeStyle = "rgba(128,82,255,0.06)";
-      ctx.lineWidth = 0.5;
-      ctx.arc(cx, cy, 3, 0, Math.PI * 2);
-      ctx.stroke();
-
       // Connection lines between active nodes
       for (let i = 0; i < nodes.length; i++) {
         for (let j = i + 1; j < nodes.length; j++) {
@@ -212,51 +205,51 @@ export function SwarmViewer({
   const statusLabel = ["Open", "Executing", "Synthesizing", "Complete", "Failed"][status] ?? "Open";
 
   return (
-    <section className="relative overflow-hidden rounded-card border border-border-card bg-[radial-gradient(circle_at_center,rgba(128,82,255,0.10),rgba(0,0,0,0.92)_42%)]">
+    <section className="relative overflow-hidden rounded-3xl border border-white/[0.08] bg-[radial-gradient(circle_at_center,rgba(128,82,255,0.10),rgba(0,0,0,0.92)_42%)]">
       <div className="grid lg:grid-cols-[260px_1fr_280px] gap-0 min-h-[560px]">
         {/* Left: Agent List */}
         <aside className="relative p-6 border-b lg:border-b-0 lg:border-r border-white/[0.05]">
           <div className="mb-6">
-            <p className="text-[11px] uppercase tracking-[0.08em] text-smoke font-semibold">
+            <p className="text-xs-3 text-smoke uppercase tracking-caps">
               Swarm
             </p>
-            <h2 className="text-[28px] font-light leading-tight text-bone mt-1">
+            <h2 className="text-2xl-3 text-bone tracking-tight-display mt-1">
               Live constellation
             </h2>
-            <p className="text-[13px] text-ash mt-2 max-w-[220px] leading-relaxed">
+            <p className="text-base text-ash mt-2 max-w-[220px] leading-relaxed">
               Agents light up as they claim work and move toward synthesis.
             </p>
           </div>
 
           <div className="space-y-3">
-            <div className="flex items-center justify-between text-[12px] text-smoke">
+            <div className="flex items-center justify-between text-xs text-smoke tracking-body">
               <span>Status</span>
-              <span className="text-bone font-mono">{statusLabel}</span>
+              <span className="text-bone">{statusLabel}</span>
             </div>
-            <div className="flex items-center justify-between text-[12px] text-smoke">
+            <div className="flex items-center justify-between text-xs text-smoke tracking-body">
               <span>Active nodes</span>
-              <span className="text-bone font-mono">{activeCount}</span>
+              <span className="text-bone">{activeCount}</span>
             </div>
-            <div className="flex items-center justify-between text-[12px] text-smoke">
+            <div className="flex items-center justify-between text-xs text-smoke tracking-body">
               <span>Claimed</span>
-              <span className="text-bone font-mono">{claimedAgents.length}</span>
+              <span className="text-bone">{claimedAgents.length}</span>
             </div>
           </div>
 
           <div className="mt-8">
-            <p className="text-[11px] uppercase tracking-[0.08em] text-smoke font-semibold mb-3">
+            <p className="text-xs-3 text-smoke uppercase tracking-caps mb-3">
               Claimed agents
             </p>
             <div className="space-y-2 max-h-[280px] overflow-auto pr-1">
               {claimedAgents.length === 0 ? (
-                <div className="rounded-card border border-dashed border-white/[0.08] px-4 py-6 text-[13px] text-smoke text-center">
+                <div className="rounded-3xl border border-dashed border-white/[0.08] px-4 py-6 text-base text-smoke text-center">
                   No agents yet. The constellation is waiting.
                 </div>
               ) : (
                 claimedAgents.map((agent, index) => (
                   <div
                     key={agent}
-                    className="flex items-center gap-3 rounded-input border border-white/[0.04] bg-white/[0.02] px-3 py-2 transition-colors hover:bg-surface-hover"
+                    className="flex items-center gap-3 rounded-3xl border border-white/[0.04] px-3 py-2 transition-colors hover:border-white/[0.08]"
                   >
                     <span
                       className={`h-2 w-2 rounded-full ${
@@ -266,10 +259,10 @@ export function SwarmViewer({
                       }`}
                     />
                     <div className="min-w-0 flex-1">
-                      <p className="text-[13px] text-bone font-mono truncate">
+                      <p className="text-base text-bone tracking-body truncate">
                         {truncateAddress(agent, 8, 6)}
                       </p>
-                      <p className="text-[11px] text-smoke">Node {index + 1}</p>
+                      <p className="text-xs text-smoke">Node {index + 1}</p>
                     </div>
                   </div>
                 ))
@@ -286,23 +279,23 @@ export function SwarmViewer({
             aria-label="Swarm constellation"
           />
           {/* Prompt overlay */}
-          <div className="absolute left-6 top-6 rounded-card border border-white/[0.08] bg-black/30 px-4 py-3 backdrop-blur-md max-w-[540px]">
-            <p className="text-[11px] uppercase tracking-[0.08em] text-smoke font-semibold">
+          <div className="absolute left-6 top-6 rounded-3xl border border-white/[0.08] bg-black/30 px-4 py-3 backdrop-blur-md max-w-[540px]">
+            <p className="text-xs-3 text-smoke uppercase tracking-caps">
               Prompt
             </p>
-            <p className="mt-1 text-[14px] text-bone leading-relaxed">{prompt}</p>
+            <p className="mt-1 text-base text-bone leading-relaxed">{prompt}</p>
           </div>
         </div>
 
         {/* Right: Task Pulse */}
         <aside className="relative p-6 border-t lg:border-t-0 lg:border-l border-white/[0.05]">
-          <p className="text-[11px] uppercase tracking-[0.08em] text-smoke font-semibold">
+          <p className="text-xs-3 text-smoke uppercase tracking-caps">
             Task Pulse
           </p>
 
           {/* Progress bar */}
           <div className="mt-3">
-            <div className="flex items-center justify-between text-[12px] text-smoke mb-2 font-mono">
+            <div className="flex items-center justify-between text-xs text-smoke mb-2 tracking-body">
               <span>Agents</span>
               <span>{claimedAgents.length}</span>
             </div>
@@ -317,33 +310,33 @@ export function SwarmViewer({
           </div>
 
           {/* Deadline card */}
-          <div className="mt-8 rounded-card border border-white/[0.08] bg-white/[0.02] p-5">
-            <p className="text-[11px] uppercase tracking-[0.08em] text-smoke font-semibold">
+          <div className="mt-8 rounded-3xl border border-white/[0.08] p-5">
+            <p className="text-xs-3 text-smoke uppercase tracking-caps">
               Deadline
             </p>
-            <p className="mt-2 text-[22px] font-light text-bone">
+            <p className="mt-2 text-2xl-3 text-bone tracking-tight-display">
               {formatDeadline(deadline)}
             </p>
-            <p className="mt-2 text-[13px] text-ash leading-relaxed">
+            <p className="mt-2 text-base text-ash leading-relaxed">
               Live updates reflect claim, submit, and synthesis events via the indexer.
             </p>
           </div>
 
           {/* Mode + Visual */}
           <div className="mt-6 grid gap-3">
-            <div className="rounded-input border border-white/[0.08] px-4 py-3">
-              <p className="text-[11px] uppercase tracking-[0.08em] text-smoke font-semibold">
+            <div className="rounded-3xl border border-white/[0.08] px-4 py-3">
+              <p className="text-xs-3 text-smoke uppercase tracking-caps">
                 Mode
               </p>
-              <p className="mt-1 text-[13px] text-bone">
+              <p className="mt-1 text-base text-bone">
                 {status >= 2 ? "Consensus forming" : "Gathering agents"}
               </p>
             </div>
-            <div className="rounded-input border border-white/[0.08] px-4 py-3">
-              <p className="text-[11px] uppercase tracking-[0.08em] text-smoke font-semibold">
+            <div className="rounded-3xl border border-white/[0.08] px-4 py-3">
+              <p className="text-xs-3 text-smoke uppercase tracking-caps">
                 Visual
               </p>
-              <p className="mt-1 text-[13px] text-bone">
+              <p className="mt-1 text-base text-bone">
                 Particle constellation, deterministic seed
               </p>
             </div>

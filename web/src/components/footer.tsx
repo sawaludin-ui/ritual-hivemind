@@ -30,7 +30,7 @@ const FOOTER_LINKS = [
 export function Footer() {
   return (
     <footer className="relative z-10 border-t border-white/[0.06] bg-void">
-      <div className="mx-auto max-w-page px-6 py-16">
+      <div className="mx-auto max-w-page px-6 py-60">
         <div className="grid grid-cols-1 md:grid-cols-4 gap-12">
           {/* Brand */}
           <div className="col-span-1">
@@ -42,9 +42,11 @@ export function Footer() {
                 <line x1="6" y1="8" x2="14" y2="5" stroke="currentColor" strokeWidth="0.5" opacity="0.4" />
                 <line x1="14" y1="5" x2="22" y2="10" stroke="currentColor" strokeWidth="0.5" opacity="0.4" />
               </svg>
-              <span className="text-[20px] font-light tracking-[-0.04em]">HIVEMIND</span>
+              <span className="text-2xl-2 text-bone tracking-tight-display">
+                HIVEMIND
+              </span>
             </div>
-            <p className="text-[13px] text-smoke leading-relaxed max-w-[280px]">
+            <p className="text-base text-smoke leading-relaxed max-w-[280px]">
               Decentralized swarm intelligence on Ritual's verifiable compute network.
             </p>
           </div>
@@ -52,7 +54,7 @@ export function Footer() {
           {/* Links */}
           {FOOTER_LINKS.map((col) => (
             <div key={col.title}>
-              <h4 className="text-[11px] font-semibold uppercase tracking-[0.08em] text-smoke mb-4">
+              <h4 className="text-xs-3 text-smoke uppercase tracking-caps mb-4">
                 {col.title}
               </h4>
               <ul className="space-y-3">
@@ -60,7 +62,7 @@ export function Footer() {
                   <li key={link.label}>
                     <Link
                       href={link.href}
-                      className="text-[13px] text-ash hover:text-bone transition-colors duration-150"
+                      className="text-base text-ash hover:text-bone transition-colors duration-150"
                     >
                       {link.label}
                     </Link>
@@ -73,10 +75,10 @@ export function Footer() {
 
         {/* Bottom bar */}
         <div className="mt-12 pt-6 border-t border-white/[0.04] flex flex-col sm:flex-row items-center justify-between gap-3">
-          <p className="text-[11px] text-smoke font-mono">
+          <p className="text-xs text-smoke tracking-body">
             Built on Ritual · chainId 1979
           </p>
-          <p className="text-[11px] text-smoke">
+          <p className="text-xs text-smoke">
             © 2026 HIVEMIND Protocol
           </p>
         </div>
