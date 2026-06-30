@@ -1,5 +1,14 @@
+import { clsx, type ClassValue } from "clsx";
+import { twMerge } from "tailwind-merge";
+
+/** Merge Tailwind classes intelligently (clsx + tailwind-merge). */
+export function cn(...inputs: ClassValue[]): string {
+  return twMerge(clsx(inputs));
+}
+
 export function truncateAddress(address: string, start = 6, end = 4): string {
   if (!address) return "";
+  if (address.length <= start + end) return address;
   return `${address.slice(0, start)}...${address.slice(-end)}`;
 }
 
@@ -23,7 +32,6 @@ export function formatRelativeTime(timestamp: bigint | number): string {
 }
 
 export function normalizeTimestamp(timestamp: bigint | number): number {
-  // Detect if timestamp is in ms (> 1e12) vs seconds (~1e9-1e10)
   const t = Number(timestamp);
   return t > 1000000000000 ? Math.floor(t / 1000) : t;
 }
@@ -43,6 +51,12 @@ export function statusFromEnum(status: number): string {
 }
 
 export function statusVariant(status: number): "open" | "executing" | "complete" | "failed" | "idle" {
-  const map = { 0: "open" as const, 1: "executing" as const, 2: "executing" as const, 3: "complete" as const, 4: "failed" as const };
+  const map = {
+    0: "open" as const,
+    1: "executing" as const,
+    2: "executing" as const,
+    3: "complete" as const,
+    4: "failed" as const,
+  };
   return map[status as keyof typeof map] ?? "idle";
 }

@@ -1,21 +1,41 @@
+import { clsx } from "clsx";
+
+type BadgeVariant =
+  | "open"
+  | "executing"
+  | "complete"
+  | "failed"
+  | "idle"
+  | "active"
+  | "gold";
+
 interface BadgeProps {
-  variant: "open" | "executing" | "complete" | "failed" | "idle" | "active" | "gold";
+  variant: BadgeVariant;
   children: React.ReactNode;
+  pulse?: boolean;
 }
 
-const styles: Record<string, string> = {
-  open: "border border-[var(--color-plum-voltage)] text-[var(--color-plum-voltage)]",
-  executing: "bg-[var(--color-swarm-active)]/10 text-[var(--color-swarm-active)]",
-  complete: "bg-[var(--color-lichen)]/10 text-[var(--color-lichen)]",
-  failed: "bg-[var(--color-swarm-fail)]/10 text-[var(--color-swarm-fail)]",
-  idle: "bg-[var(--color-swarm-idle)]/10 text-[var(--color-smoke)]",
-  active: "bg-[var(--color-plum-voltage)]/10 text-[var(--color-plum-voltage)]",
-  gold: "text-[var(--color-reputation-gold)] bg-[var(--color-reputation-gold)]/10",
+const styles: Record<BadgeVariant, string> = {
+  open: "border border-plum-voltage/40 text-plum-voltage bg-transparent",
+  executing: "bg-plum-voltage/15 text-plum-voltage",
+  complete: "bg-lichen/15 text-lichen",
+  failed: "bg-swarm-fail/15 text-swarm-fail",
+  idle: "bg-transparent text-smoke border border-white/[0.08]",
+  active: "bg-plum-voltage/15 text-plum-voltage",
+  gold: "text-amber-spark bg-amber-spark/10",
 };
 
-export function Badge({ variant, children }: BadgeProps) {
+export function Badge({ variant, children, pulse = false }: BadgeProps) {
   return (
-    <span className={`inline-flex items-center px-3 py-0.5 text-xs font-medium rounded-[24px] transition-transform duration-150 hover:scale-[1.02] ${styles[variant] ?? ""}`}>
+    <span
+      className={clsx(
+        "inline-flex items-center gap-1.5 px-3 py-0.5 text-xs font-medium tracking-[0.021em] rounded-pill transition-transform duration-150",
+        styles[variant],
+      )}
+    >
+      {pulse && (
+        <span className="w-1.5 h-1.5 rounded-full bg-current animate-pulse-dot" />
+      )}
       {children}
     </span>
   );

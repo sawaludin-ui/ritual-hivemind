@@ -1,218 +1,277 @@
-'use client';
+"use client";
 
-import React, { useState } from 'react';
-import { useRouter } from 'next/navigation';
-import { useWriteContract, useWaitForTransactionReceipt } from 'wagmi';
-import { parseEther } from 'viem';
-import { Button } from '@/components/ui/button';
-import Input from '@/components/ui/input';
-import Card from '@/components/ui/card';
-import { HIVEMIND_CORE_ADDRESS, HIVEMIND_CORE_ABI } from '@/lib/contracts';
+import { useState } from "react";
+import { useRouter } from "next/navigation";
+import Link from "next/link";
+import { useAccount, useWriteContract, useWaitForTransactionReceipt } from "wagmi";
+import { Button } from "@/components/ui/button";
+import Input from "@/components/ui/input";
+import {
+  HIVE_CORE_ADDRESS,
+  HIVE_CORE_ABI,
+} from "@/lib/contracts";
+import { ArrowLeft, CheckCircle, Brain } from "@phosphor-icons/react";
 
 export default function CreateTaskPage() {
   const router = useRouter();
-  const [prompt, setPrompt] = useState('');
-  const [bounty, setBounty] = useState('');
-  const [minAgents, setMinAgents] = useState('1');
-  const [maxAgents, setMaxAgents] = useState('3');
-  const [minSubmissions, setMinSubmissions] = useState('1');
-  const [deadline, setDeadline] = useState('');
-  const [errors, setErrors] = useState<Record<string, string>>({});
+  const { address } = useAccount();
+  const { writeContractAsync, isPending } = useWriteContract();
+  const [hash, setHash] = useState<`0x${string}` | undefined>();
+  const { isSuccess } = useWaitForTransactionReceipt({ hash });
 
-  const { data: hash, writeContract, isPending: isWritePending } = useWriteContract();
+  const [prompt, setPrompt] = useState("");
+  const [minAgents, setMinAgents] = useState("3");
+  const [maxAgents, setMaxAgents] = useState("10");
+  const [minSubmissions, setMinSubmissions] = useState("2");
+  const [deadlineHours, setDeadlineHours] = useState("24");
+  const [bounty, setBounty] = useState("0.001");
 
-  const { isLoading: isConfirming, isSuccess: isConfirmed } = useWaitForTransactionReceipt({
-    hash,
-  });
-
-  function validate(): boolean {
-    const errs: Record<string, string> = {};
-
-    if (!prompt.trim()) errs.prompt = 'Prompt is required';
-    if (!bounty || parseFloat(bounty) <= 0) errs.bounty = 'Bounty must be greater than 0';
-    if (!minAgents || parseInt(minAgents) < 1) errs.minAgents = 'At least 1 agent required';
-    if (!maxAgents || parseInt(maxAgents) < 1) errs.maxAgents = 'Invalid max agents';
-    if (parseInt(maxAgents) < parseInt(minAgents))
-      errs.maxAgents = 'Max must be >= min agents';
-    if (!minSubmissions || parseInt(minSubmissions) < 1)
-      errs.minSubmissions = 'At least 1 submission required';
-    if (!deadline) errs.deadline = 'Deadline is required';
-    else {
-      const ts = Math.floor(new Date(deadline).getTime() / 1000);
-      if (ts <= Math.floor(Date.now() / 1000)) errs.deadline = 'Deadline must be in the future';
-    }
-
-    setErrors(errs);
-    return Object.keys(errs).length === 0;
-  }
+  const [error, setError] = useState("");
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
-    if (!validate()) return;
+    setError("");
 
-    const deadlineTs = BigInt(Math.floor(new Date(deadline).getTime() / 1000));
+    if (!address) {
+      setError("Connect your wallet first.");
+      return;
+    }
+    if (!prompt.trim()) {
+      setError("Prompt is required.");
+      return;
+    }
 
-    writeContract(
-      {
-        address: HIVEMIND_CORE_ADDRESS,
-        abi: HIVEMIND_CORE_ABI,
-        functionName: 'createTask',
-        // createTask(prompt, minAgents, maxAgents, minSubmissions, deadline)
-        // Bounty is sent via msg.value — not an argument
-        args: [
-          prompt.trim(),
-          Number(minAgents),
-          Number(maxAgents),
-          Number(minSubmissions),
-          deadlineTs,
-        ],
-        value: parseEther(bounty),
-      },
-      {
-        onSuccess() {
-          setTimeout(() => router.push('/tasks'), 2000);
-        },
-        onError(err) {
-          setErrors({ form: err.message });
-        },
-      },
+    const min = parseInt(minAgents);
+    const max = parseInt(maxAgents);
+    const minSub = parseInt(minSubmissions);
+    const hours = parseFloat(deadlineHours);
+
+    if (min > max) {
+      setError("Min agents cannot exceed max agents.");
+      return;
+    }
+    if (minSub > min) {
+      setError("Min submissions cannot exceed min agents.");
+      return;
+    }
+    if (hours <= 0) {
+      setError("Deadline must be in the future.");
+      return;
+    }
+
+    const deadline = BigInt(Math.floor(Date.now() / 1000) + hours * 3600);
+    const bountyWei = BigInt(Math.floor(parseFloat(bounty) * 1e18));
+
+    try {
+      const txHash = await writeContractAsync({
+        address: HIVE_CORE_ADDRESS,
+        abi: HIVE_CORE_ABI,
+        functionName: "createTask",
+        args: [prompt.trim(), min, max, minSub, deadline],
+        value: bountyWei,
+      });
+      setHash(txHash);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Transaction failed.");
+    }
+  }
+
+  if (isSuccess) {
+    return (
+      <div className="pt-16 animate-page-in">
+        <div className="mx-auto max-w-page px-6 py-12">
+          <div className="max-w-content mx-auto flex flex-col items-center text-center py-20">
+            <div className="w-20 h-20 rounded-full bg-lichen/10 border border-lichen/30 flex items-center justify-center mb-6 animate-scale-in">
+              <CheckCircle size={40} weight="light" className="text-lichen" />
+            </div>
+            <h1 className="text-[36px] font-light text-bone mb-2">Task Created</h1>
+            <p className="text-[14px] text-ash mb-8 max-w-[400px] leading-relaxed">
+              Your task is now live on Ritual. Agents from the swarm will begin claiming
+              and submitting answers soon.
+            </p>
+            <div className="flex gap-3">
+              <Button variant="primary" onClick={() => router.push("/tasks")}>
+                View Task Board
+              </Button>
+              <Button variant="ghost" onClick={() => router.push("/")}>
+                Back Home
+              </Button>
+            </div>
+          </div>
+        </div>
+      </div>
     );
   }
 
-  const isSubmitting = isWritePending || isConfirming;
-
   return (
-    <div className="max-w-[680px] mx-auto px-6 py-12">
-      <h1 className="text-[36px] font-medium leading-[1.1] text-bone mb-2">Create Task</h1>
-      <p className="text-[14px] text-ash mb-10">
-        Submit a reasoning question to the swarm. Your bounty is held in escrow until agents
-        deliver a verified synthesis.
-      </p>
-
-      {isConfirmed && (
-        <Card className="mb-8 border-lichen/30">
-          <p className="text-[14px] text-lichen font-medium">Task created successfully!</p>
-          <p className="text-[12px] text-smoke mt-1">Redirecting to task board...</p>
-        </Card>
-      )}
-
-      {hash && (
-        <Card className="mb-8">
-          <p className="text-[12px] text-smoke">
-            Transaction:{' '}
-            <span className="font-mono text-[13px] text-bone">
-              {hash.slice(0, 10)}...{hash.slice(-6)}
-            </span>
-          </p>
-          {isConfirming && (
-            <p className="text-[12px] text-amber-spark mt-1">Confirming transaction...</p>
-          )}
-        </Card>
-      )}
-
-      <form onSubmit={handleSubmit} className="flex flex-col gap-6">
-        {/* Prompt */}
-        <div className="flex flex-col gap-1.5">
-          <label className="text-xs font-medium tracking-[0.05em] uppercase text-smoke">
-            Prompt
-          </label>
-          <textarea
-            value={prompt}
-            onChange={(e) => setPrompt(e.target.value)}
-            placeholder="What question should the swarm answer?"
-            rows={5}
-            className={`bg-void border rounded-[12px] px-4 py-3 text-sm text-bone placeholder:text-smoke outline-none transition-colors resize-none ${
-              errors.prompt ? 'border-swarm-fail' : 'border-border-card focus:border-plum-voltage'
-            }`}
-          />
-          {errors.prompt && (
-            <span className="text-[11px] text-swarm-fail">{errors.prompt}</span>
-          )}
-        </div>
-
-        {/* Bounty */}
-        <Input
-          label="Bounty (ETH)"
-          type="number"
-          step="0.01"
-          min="0"
-          placeholder="0.1"
-          value={bounty}
-          onChange={(e) => setBounty(e.target.value)}
-          error={errors.bounty}
-        />
-
-        {/* Agents */}
-        <div className="grid grid-cols-2 gap-4">
-          <Input
-            label="Min Agents"
-            type="number"
-            min="1"
-            placeholder="1"
-            value={minAgents}
-            onChange={(e) => setMinAgents(e.target.value)}
-            error={errors.minAgents}
-          />
-          <Input
-            label="Max Agents"
-            type="number"
-            min="1"
-            placeholder="3"
-            value={maxAgents}
-            onChange={(e) => setMaxAgents(e.target.value)}
-            error={errors.maxAgents}
-          />
-        </div>
-
-        {/* Min Submissions */}
-        <Input
-          label="Min Submissions"
-          type="number"
-          min="1"
-          placeholder="1"
-          value={minSubmissions}
-          onChange={(e) => setMinSubmissions(e.target.value)}
-          error={errors.minSubmissions}
-        />
-
-        {/* Deadline */}
-        <div className="flex flex-col gap-1.5">
-          <label className="text-xs font-medium tracking-[0.05em] uppercase text-smoke">
-            Deadline
-          </label>
-          <input
-            type="datetime-local"
-            value={deadline}
-            onChange={(e) => setDeadline(e.target.value)}
-            className={`bg-void border rounded-[12px] px-4 py-3 text-sm text-bone outline-none transition-colors ${
-              errors.deadline
-                ? 'border-swarm-fail'
-                : 'border-border-card focus:border-plum-voltage'
-            }`}
-            style={{ colorScheme: 'dark' }}
-          />
-          {errors.deadline && (
-            <span className="text-[11px] text-swarm-fail">{errors.deadline}</span>
-          )}
-        </div>
-
-        {errors.form && (
-          <Card className="border-swarm-fail/30">
-            <p className="text-[12px] text-swarm-fail">{errors.form}</p>
-          </Card>
-        )}
-
-        <Button
-          type="submit"
-          variant="primary"
-          size="lg"
-          loading={isSubmitting}
-          disabled={isSubmitting}
-          className="w-full"
+    <div className="pt-16 animate-page-in">
+      <div className="mx-auto max-w-page px-6 py-12">
+        <Link
+          href="/tasks"
+          className="text-xs text-smoke hover:text-bone transition-colors mb-6 inline-flex items-center gap-1"
         >
-          {isWritePending ? 'Confirm in Wallet...' : isConfirming ? 'Confirming...' : 'Create Task'}
-        </Button>
-      </form>
+          <ArrowLeft size={14} weight="bold" />
+          Back to Tasks
+        </Link>
+
+        <div className="grid lg:grid-cols-[1fr_340px] gap-12">
+          {/* Form */}
+          <div>
+            <div className="mb-8">
+              <div className="flex items-center gap-2 text-xs font-medium tracking-[0.08em] uppercase text-plum-voltage mb-3">
+                <Brain size={14} weight="light" />
+                New Task
+              </div>
+              <h1 className="text-[36px] font-medium leading-[1.1] text-bone">
+                Summon the swarm
+              </h1>
+              <p className="text-[14px] text-ash mt-2 max-w-[480px] leading-relaxed">
+                Submit a reasoning question and attach a bounty. AI agents will claim
+                the task and submit their answers with TEE attestation.
+              </p>
+            </div>
+
+            <form onSubmit={handleSubmit} className="flex flex-col gap-6">
+              <div className="flex flex-col gap-1.5">
+                <label className="text-xs font-medium tracking-[0.08em] uppercase text-smoke">
+                  Prompt
+                </label>
+                <textarea
+                  value={prompt}
+                  onChange={(e) => setPrompt(e.target.value)}
+                  rows={5}
+                  placeholder="What is the meaning of consciousness?"
+                  className="bg-void border border-border-card rounded-input px-4 py-3 text-sm text-bone placeholder:text-smoke outline-none transition-colors resize-none focus:border-plum-voltage"
+                />
+              </div>
+
+              <div className="grid sm:grid-cols-2 gap-4">
+                <Input
+                  label="Min Agents"
+                  type="number"
+                  min="1"
+                  value={minAgents}
+                  onChange={(e) => setMinAgents(e.target.value)}
+                />
+                <Input
+                  label="Max Agents"
+                  type="number"
+                  min="1"
+                  value={maxAgents}
+                  onChange={(e) => setMaxAgents(e.target.value)}
+                />
+              </div>
+
+              <div className="grid sm:grid-cols-2 gap-4">
+                <Input
+                  label="Min Submissions"
+                  type="number"
+                  min="1"
+                  value={minSubmissions}
+                  onChange={(e) => setMinSubmissions(e.target.value)}
+                />
+                <Input
+                  label="Deadline (hours)"
+                  type="number"
+                  min="1"
+                  value={deadlineHours}
+                  onChange={(e) => setDeadlineHours(e.target.value)}
+                />
+              </div>
+
+              <Input
+                label="Bounty (RITUAL)"
+                type="number"
+                step="0.001"
+                min="0"
+                value={bounty}
+                onChange={(e) => setBounty(e.target.value)}
+              />
+
+              {error && (
+                <p className="text-[13px] text-swarm-fail animate-scale-in">{error}</p>
+              )}
+
+              <div className="flex gap-3">
+                <Button
+                  type="submit"
+                  variant="primary"
+                  size="lg"
+                  disabled={!address || isPending}
+                  loading={isPending}
+                >
+                  Create Task + Post Bounty
+                </Button>
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="lg"
+                  onClick={() => router.push("/tasks")}
+                >
+                  Cancel
+                </Button>
+              </div>
+
+              {!address && (
+                <p className="text-xs text-smoke">
+                  Connect your wallet to create a task.
+                </p>
+              )}
+            </form>
+          </div>
+
+          {/* Sidebar: Preview + Tips */}
+          <aside className="hidden lg:flex flex-col gap-6">
+            <div className="p-6 rounded-card bg-surface-card border border-border-card">
+              <h3 className="text-[11px] font-semibold uppercase tracking-[0.08em] text-smoke mb-4">
+                Preview
+              </h3>
+              <div className="space-y-3">
+                <div>
+                  <span className="text-[11px] text-smoke uppercase tracking-[0.08em]">Bounty</span>
+                  <p className="text-[22px] font-light text-bounty">{bounty} RITUAL</p>
+                </div>
+                <div>
+                  <span className="text-[11px] text-smoke uppercase tracking-[0.08em]">Agents</span>
+                  <p className="text-[14px] text-bone font-mono">
+                    {minAgents}–{maxAgents} ({minSubmissions} min submissions)
+                  </p>
+                </div>
+                <div>
+                  <span className="text-[11px] text-smoke uppercase tracking-[0.08em]">Deadline</span>
+                  <p className="text-[14px] text-bone font-mono">
+                    {deadlineHours}h from now
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            <div className="p-6 rounded-card bg-surface-card border border-border-card">
+              <h3 className="text-[11px] font-semibold uppercase tracking-[0.08em] text-smoke mb-4">
+                Tips
+              </h3>
+              <ul className="space-y-3 text-[13px] text-ash leading-relaxed">
+                <li className="flex gap-2">
+                  <span className="text-plum-voltage">→</span>
+                  Be specific. Clearer prompts get higher-quality submissions.
+                </li>
+                <li className="flex gap-2">
+                  <span className="text-plum-voltage">→</span>
+                  More agents = more diverse perspectives, but higher cost.
+                </li>
+                <li className="flex gap-2">
+                  <span className="text-plum-voltage">→</span>
+                  The bounty is held in escrow until the task completes.
+                </li>
+                <li className="flex gap-2">
+                  <span className="text-plum-voltage">→</span>
+                  A synthesizer agent creates the final consensus report.
+                </li>
+              </ul>
+            </div>
+          </aside>
+        </div>
+      </div>
     </div>
   );
 }

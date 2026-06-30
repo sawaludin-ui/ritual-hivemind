@@ -1,12 +1,12 @@
-'use client';
+"use client";
 
-import { useEffect, useMemo, useRef } from 'react';
-import { formatDeadline, truncateAddress } from '@/lib/utils';
+import { useEffect, useMemo, useRef } from "react";
+import { formatDeadline, truncateAddress } from "@/lib/utils";
 
 type SwarmNode = {
   address: string;
   label: string;
-  status: 'active' | 'idle' | 'complete';
+  status: "active" | "idle" | "complete";
   x: number;
   y: number;
   vx: number;
@@ -51,81 +51,83 @@ export function SwarmViewer({
   useEffect(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;
-    const ctx = canvas.getContext('2d');
+    const ctx = canvas.getContext("2d");
     if (!ctx) return;
 
     let raf = 0;
     const rand = seeded(seed);
-    const mobile = window.innerWidth < 768;
-    const nodes: SwarmNode[] = [];
-    const nodeCount = Math.max(4, Math.min(claimedAgents.length || 4, mobile ? 8 : 12));
-    const width = () => canvas.width;
-    const height = () => canvas.height;
+    const dpr = Math.min(window.devicePixelRatio || 1, 2);
+    const isMobile = window.innerWidth < 768;
 
     function resize() {
-      if (!canvas) return;
-      if (!ctx) return;
+      if (!canvas || !ctx) return;
       const rect = canvas.getBoundingClientRect();
-      canvas.width = Math.round(rect.width * window.devicePixelRatio);
-      canvas.height = Math.round(rect.height * window.devicePixelRatio);
-      ctx.setTransform(window.devicePixelRatio, 0, 0, window.devicePixelRatio, 0, 0);
-    }
-
-    function statusFor(index: number): SwarmNode['status'] {
-      if (index < claimedAgents.length) {
-        return index === 0 || status >= 2 ? 'complete' : 'active';
-      }
-      return 'idle';
+      canvas.width = Math.round(rect.width * dpr);
+      canvas.height = Math.round(rect.height * dpr);
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
     }
 
     resize();
-    window.addEventListener('resize', resize);
+    window.addEventListener("resize", resize);
 
-    const centerX = () => canvas.getBoundingClientRect().width / 2;
-    const centerY = () => canvas.getBoundingClientRect().height / 2;
+    const nodes: SwarmNode[] = [];
+    const nodeCount = Math.max(4, Math.min(claimedAgents.length || 4, isMobile ? 8 : 12));
+
+    function statusFor(index: number): SwarmNode["status"] {
+      if (index < claimedAgents.length) {
+        return index === 0 || status >= 2 ? "complete" : "active";
+      }
+      return "idle";
+    }
+
+    const rect = canvas.getBoundingClientRect();
+    const cx = rect.width / 2;
+    const cy = rect.height / 2;
 
     for (let i = 0; i < nodeCount; i++) {
       const angle = (Math.PI * 2 * i) / nodeCount;
-      const radius = mobile ? 70 + rand() * 80 : 110 + rand() * 170;
+      const radius = isMobile ? 60 + rand() * 60 : 100 + rand() * 140;
       nodes.push({
-        address: claimedAgents[i] ?? `0x${(seed + i).toString(16).padStart(40, '0').slice(0, 40)}`,
+        address: claimedAgents[i] ?? `0x${(seed + i).toString(16).padStart(40, "0").slice(0, 40)}`,
         label: claimedAgents[i] ? truncateAddress(claimedAgents[i], 8, 6) : `Agent-${i + 1}`,
         status: statusFor(i),
-        x: centerX() + Math.cos(angle) * radius,
-        y: centerY() + Math.sin(angle) * radius * (mobile ? 0.7 : 1),
-        vx: (rand() - 0.5) * 0.35,
-        vy: (rand() - 0.5) * 0.35,
-        size: i < claimedAgents.length ? 5.5 : 4,
+        x: cx + Math.cos(angle) * radius,
+        y: cy + Math.sin(angle) * radius * (isMobile ? 0.7 : 1),
+        vx: (rand() - 0.5) * 0.25,
+        vy: (rand() - 0.5) * 0.25,
+        size: i < claimedAgents.length ? 5 : 3.5,
         pulse: rand() * Math.PI * 2,
       });
     }
 
     function draw() {
-      if (!canvas) return;
-      if (!ctx) return;
+      if (!canvas || !ctx) return;
       const rect = canvas.getBoundingClientRect();
       ctx.clearRect(0, 0, rect.width, rect.height);
 
       const cx = rect.width / 2;
       const cy = rect.height / 2;
-      const outer = mobile ? Math.min(rect.width, rect.height) * 0.28 : Math.min(rect.width, rect.height) * 0.34;
+      const outerRadius = isMobile
+        ? Math.min(rect.width, rect.height) * 0.26
+        : Math.min(rect.width, rect.height) * 0.32;
 
+      // Orbital rings
       for (let ring = 1; ring <= 3; ring++) {
         ctx.beginPath();
-        ctx.strokeStyle = `rgba(255,255,255,${0.05 - ring * 0.01})`;
+        ctx.strokeStyle = `rgba(255,255,255,${0.04 - ring * 0.008})`;
         ctx.lineWidth = 1;
-        ctx.arc(cx, cy, outer * (ring / 3), 0, Math.PI * 2);
+        ctx.arc(cx, cy, outerRadius * (ring / 3), 0, Math.PI * 2);
         ctx.stroke();
       }
 
-      const deadlineText = formatDeadline(deadline);
+      // Center pulse
+      ctx.beginPath();
+      ctx.strokeStyle = "rgba(128,82,255,0.06)";
+      ctx.lineWidth = 0.5;
+      ctx.arc(cx, cy, 3, 0, Math.PI * 2);
+      ctx.stroke();
 
-      ctx.font = '600 12px var(--font-sans), system-ui';
-      ctx.fillStyle = 'rgba(214,214,214,0.8)';
-      ctx.fillText(`Task #${taskId}`, 18, 22);
-      ctx.fillStyle = 'rgba(154,154,154,0.9)';
-      ctx.fillText(deadlineText, 18, 40);
-
+      // Connection lines between active nodes
       for (let i = 0; i < nodes.length; i++) {
         for (let j = i + 1; j < nodes.length; j++) {
           const a = nodes[i];
@@ -133,73 +135,95 @@ export function SwarmViewer({
           const dx = a.x - b.x;
           const dy = a.y - b.y;
           const dist = Math.sqrt(dx * dx + dy * dy);
-          if (dist < (mobile ? 120 : 170)) {
+          if (dist < (isMobile ? 100 : 160)) {
+            const alpha = Math.max(0, 0.15 - dist / 1000);
+            const color =
+              a.status === "complete" && b.status === "complete"
+                ? "21,132,110"
+                : "128,82,255";
             ctx.beginPath();
             ctx.moveTo(a.x, a.y);
             ctx.lineTo(b.x, b.y);
-            ctx.strokeStyle = `rgba(128,82,255,${Math.max(0, 0.18 - dist / 1000)})`;
-            ctx.lineWidth = 0.6;
+            ctx.strokeStyle = `rgba(${color},${alpha})`;
+            ctx.lineWidth = 0.5;
             ctx.stroke();
           }
         }
       }
 
+      // Nodes
       for (const node of nodes) {
-        node.pulse += node.status === 'active' ? 0.05 : 0.02;
-        const drift = node.status === 'idle' ? 0.28 : 0.48;
+        node.pulse += node.status === "active" ? 0.04 : 0.015;
+        const drift = node.status === "idle" ? 0.2 : 0.35;
         node.x += node.vx * drift;
         node.y += node.vy * drift;
 
+        // Gravity toward orbit
         const dx = node.x - cx;
         const dy = node.y - cy;
         const dist = Math.sqrt(dx * dx + dy * dy) || 1;
-        const target = outer;
-        node.x -= (dist - target) * (dx / dist) * 0.003;
-        node.y -= (dist - target) * (dy / dist) * 0.003;
+        node.x -= (dist - outerRadius) * (dx / dist) * 0.002;
+        node.y -= (dist - outerRadius) * (dy / dist) * 0.002;
 
+        // Wrap
         if (node.x < 0) node.x = rect.width;
         if (node.x > rect.width) node.x = 0;
         if (node.y < 0) node.y = rect.height;
         if (node.y > rect.height) node.y = 0;
 
-        const isActive = node.status !== 'idle';
-        const alpha = isActive ? 0.95 : 0.5;
-        const color = node.status === 'complete' ? '21,132,110' : node.status === 'active' ? '128,82,255' : '154,154,154';
-        const pulse = node.size + Math.sin(node.pulse) * (node.status === 'complete' ? 1.2 : 0.8);
+        const isActive = node.status !== "idle";
+        const alpha = isActive ? 0.95 : 0.4;
+        const color =
+          node.status === "complete"
+            ? "21,132,110"
+            : node.status === "active"
+            ? "128,82,255"
+            : "154,154,154";
+        const pulse = node.size + Math.sin(node.pulse) * (node.status === "complete" ? 1.2 : 0.8);
 
+        // Core
         ctx.beginPath();
         ctx.fillStyle = `rgba(${color},${alpha})`;
         ctx.arc(node.x, node.y, pulse, 0, Math.PI * 2);
         ctx.fill();
 
-        ctx.beginPath();
-        ctx.strokeStyle = node.status === 'active' ? 'rgba(128,82,255,0.24)' : 'rgba(255,255,255,0.08)';
-        ctx.lineWidth = 1;
-        ctx.arc(node.x, node.y, pulse + (node.status === 'active' ? 6 : 4), 0, Math.PI * 2);
-        ctx.stroke();
+        // Ring around active nodes
+        if (isActive) {
+          ctx.beginPath();
+          ctx.strokeStyle = `rgba(${color},0.2)`;
+          ctx.lineWidth = 1;
+          ctx.arc(node.x, node.y, pulse + (node.status === "active" ? 8 : 5), 0, Math.PI * 2);
+          ctx.stroke();
+        }
       }
 
-      raf = window.setTimeout(draw, mobile ? 40 : 32);
+      raf = window.setTimeout(draw, isMobile ? 40 : 32);
     }
 
     draw();
+
     return () => {
-      window.removeEventListener('resize', resize);
+      window.removeEventListener("resize", resize);
       window.clearTimeout(raf);
     };
   }, [seed, taskId, prompt, deadline, claimedAgents, status]);
 
   const activeCount = claimedAgents.length;
-  const statusLabel = ['Open', 'Executing', 'Synthesizing', 'Complete', 'Failed'][status] ?? 'Open';
+  const statusLabel = ["Open", "Executing", "Synthesizing", "Complete", "Failed"][status] ?? "Open";
 
   return (
-    <section className="relative overflow-hidden rounded-[32px] border border-border-card bg-[radial-gradient(circle_at_center,rgba(128,82,255,0.12),rgba(0,0,0,0.92)_42%)]">
-      <div className="grid lg:grid-cols-[260px_1fr_300px] gap-0 min-h-[560px]">
-        <aside className="relative p-6 border-b lg:border-b-0 lg:border-r border-white/5">
+    <section className="relative overflow-hidden rounded-card border border-border-card bg-[radial-gradient(circle_at_center,rgba(128,82,255,0.10),rgba(0,0,0,0.92)_42%)]">
+      <div className="grid lg:grid-cols-[260px_1fr_280px] gap-0 min-h-[560px]">
+        {/* Left: Agent List */}
+        <aside className="relative p-6 border-b lg:border-b-0 lg:border-r border-white/[0.05]">
           <div className="mb-6">
-            <p className="text-[11px] uppercase tracking-[0.08em] text-smoke">Swarm</p>
-            <h2 className="text-[28px] font-light leading-tight text-bone mt-1">Live constellation</h2>
-            <p className="text-[13px] text-ash mt-2 max-w-[220px]">
+            <p className="text-[11px] uppercase tracking-[0.08em] text-smoke font-semibold">
+              Swarm
+            </p>
+            <h2 className="text-[28px] font-light leading-tight text-bone mt-1">
+              Live constellation
+            </h2>
+            <p className="text-[13px] text-ash mt-2 max-w-[220px] leading-relaxed">
               Agents light up as they claim work and move toward synthesis.
             </p>
           </div>
@@ -207,38 +231,44 @@ export function SwarmViewer({
           <div className="space-y-3">
             <div className="flex items-center justify-between text-[12px] text-smoke">
               <span>Status</span>
-              <span className="text-bone">{statusLabel}</span>
+              <span className="text-bone font-mono">{statusLabel}</span>
             </div>
             <div className="flex items-center justify-between text-[12px] text-smoke">
               <span>Active nodes</span>
-              <span className="text-bone">{activeCount}</span>
+              <span className="text-bone font-mono">{activeCount}</span>
             </div>
             <div className="flex items-center justify-between text-[12px] text-smoke">
               <span>Claimed</span>
-              <span className="text-bone">{claimedAgents.length}</span>
+              <span className="text-bone font-mono">{claimedAgents.length}</span>
             </div>
           </div>
 
           <div className="mt-8">
-            <p className="text-[11px] uppercase tracking-[0.08em] text-smoke mb-3">Claimed agents</p>
-            <div className="space-y-2 max-h-[300px] overflow-auto pr-1">
+            <p className="text-[11px] uppercase tracking-[0.08em] text-smoke font-semibold mb-3">
+              Claimed agents
+            </p>
+            <div className="space-y-2 max-h-[280px] overflow-auto pr-1">
               {claimedAgents.length === 0 ? (
-                <div className="rounded-2xl border border-dashed border-white/8 px-4 py-6 text-[13px] text-smoke">
+                <div className="rounded-card border border-dashed border-white/[0.08] px-4 py-6 text-[13px] text-smoke text-center">
                   No agents yet. The constellation is waiting.
                 </div>
               ) : (
                 claimedAgents.map((agent, index) => (
                   <div
                     key={agent}
-                    className="flex items-center gap-3 rounded-2xl border border-white/6 bg-white/3 px-3 py-2"
+                    className="flex items-center gap-3 rounded-input border border-white/[0.04] bg-white/[0.02] px-3 py-2 transition-colors hover:bg-surface-hover"
                   >
                     <span
-                    className={`h-2.5 w-2.5 rounded-full ${
-                        index === 0 || status >= 2 ? 'bg-lichen' : 'bg-plum-voltage'
+                      className={`h-2 w-2 rounded-full ${
+                        index === 0 || status >= 2
+                          ? "bg-lichen"
+                          : "bg-plum-voltage animate-pulse-dot"
                       }`}
                     />
-                    <div className="min-w-0">
-                      <p className="text-[13px] text-bone font-mono truncate">{truncateAddress(agent, 8, 6)}</p>
+                    <div className="min-w-0 flex-1">
+                      <p className="text-[13px] text-bone font-mono truncate">
+                        {truncateAddress(agent, 8, 6)}
+                      </p>
                       <p className="text-[11px] text-smoke">Node {index + 1}</p>
                     </div>
                   </div>
@@ -248,45 +278,74 @@ export function SwarmViewer({
           </div>
         </aside>
 
+        {/* Center: Canvas */}
         <div className="relative min-h-[360px] lg:min-h-[560px]">
-          <canvas ref={canvasRef} className="absolute inset-0 h-full w-full" aria-label="Swarm constellation" />
-          <div className="absolute left-6 top-6 rounded-[24px] border border-white/8 bg-black/30 px-4 py-3 backdrop-blur-md">
-            <p className="text-[11px] uppercase tracking-[0.08em] text-smoke">Prompt</p>
-            <p className="mt-1 max-w-[540px] text-[14px] text-bone leading-relaxed">{prompt}</p>
+          <canvas
+            ref={canvasRef}
+            className="absolute inset-0 h-full w-full"
+            aria-label="Swarm constellation"
+          />
+          {/* Prompt overlay */}
+          <div className="absolute left-6 top-6 rounded-card border border-white/[0.08] bg-black/30 px-4 py-3 backdrop-blur-md max-w-[540px]">
+            <p className="text-[11px] uppercase tracking-[0.08em] text-smoke font-semibold">
+              Prompt
+            </p>
+            <p className="mt-1 text-[14px] text-bone leading-relaxed">{prompt}</p>
           </div>
         </div>
 
-        <aside className="relative p-6 border-t lg:border-t-0 lg:border-l border-white/5">
-          <p className="text-[11px] uppercase tracking-[0.08em] text-smoke">Task Pulse</p>
+        {/* Right: Task Pulse */}
+        <aside className="relative p-6 border-t lg:border-t-0 lg:border-l border-white/[0.05]">
+          <p className="text-[11px] uppercase tracking-[0.08em] text-smoke font-semibold">
+            Task Pulse
+          </p>
+
+          {/* Progress bar */}
           <div className="mt-3">
-            <div className="flex items-center justify-between text-[12px] text-smoke mb-2">
+            <div className="flex items-center justify-between text-[12px] text-smoke mb-2 font-mono">
               <span>Agents</span>
               <span>{claimedAgents.length}</span>
             </div>
-            <div className="h-1.5 w-full rounded-full bg-white/6 overflow-hidden">
+            <div className="h-1 w-full rounded-full bg-white/[0.06] overflow-hidden">
               <div
-                className="h-full rounded-full bg-plum-voltage transition-all duration-700 ease-out"
-                style={{ width: `${Math.min(100, claimedAgents.length * 18)}%` }}
+                className="h-full rounded-full bg-plum-voltage transition-all duration-600 ease-out"
+                style={{
+                  width: `${Math.min(100, claimedAgents.length * 18)}%`,
+                }}
               />
             </div>
           </div>
 
-          <div className="mt-8 rounded-[28px] border border-white/8 bg-white/3 p-5">
-            <p className="text-[11px] uppercase tracking-[0.08em] text-smoke">Deadline</p>
-            <p className="mt-2 text-[22px] font-light text-bone">{formatDeadline(deadline)}</p>
-            <p className="mt-2 text-[13px] text-ash">
+          {/* Deadline card */}
+          <div className="mt-8 rounded-card border border-white/[0.08] bg-white/[0.02] p-5">
+            <p className="text-[11px] uppercase tracking-[0.08em] text-smoke font-semibold">
+              Deadline
+            </p>
+            <p className="mt-2 text-[22px] font-light text-bone">
+              {formatDeadline(deadline)}
+            </p>
+            <p className="mt-2 text-[13px] text-ash leading-relaxed">
               Live updates reflect claim, submit, and synthesis events via the indexer.
             </p>
           </div>
 
+          {/* Mode + Visual */}
           <div className="mt-6 grid gap-3">
-            <div className="rounded-2xl border border-white/8 px-4 py-3">
-              <p className="text-[11px] uppercase tracking-[0.08em] text-smoke">Mode</p>
-              <p className="mt-1 text-[13px] text-bone">{status >= 2 ? 'Consensus forming' : 'Gathering agents'}</p>
+            <div className="rounded-input border border-white/[0.08] px-4 py-3">
+              <p className="text-[11px] uppercase tracking-[0.08em] text-smoke font-semibold">
+                Mode
+              </p>
+              <p className="mt-1 text-[13px] text-bone">
+                {status >= 2 ? "Consensus forming" : "Gathering agents"}
+              </p>
             </div>
-            <div className="rounded-2xl border border-white/8 px-4 py-3">
-              <p className="text-[11px] uppercase tracking-[0.08em] text-smoke">Visual</p>
-              <p className="mt-1 text-[13px] text-bone">Particle constellation, deterministic seed</p>
+            <div className="rounded-input border border-white/[0.08] px-4 py-3">
+              <p className="text-[11px] uppercase tracking-[0.08em] text-smoke font-semibold">
+                Visual
+              </p>
+              <p className="mt-1 text-[13px] text-bone">
+                Particle constellation, deterministic seed
+              </p>
             </div>
           </div>
         </aside>

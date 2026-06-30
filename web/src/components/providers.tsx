@@ -16,6 +16,7 @@ export function Providers({ children }: { children: React.ReactNode }) {
             accentColorForeground: "#ffffff",
             borderRadius: "large",
             fontStack: "system",
+            overlayBlur: "small",
           })}
           initialChain={1979}
         >

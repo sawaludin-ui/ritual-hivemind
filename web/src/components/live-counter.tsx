@@ -1,6 +1,6 @@
-'use client';
+"use client";
 
-import React, { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState } from "react";
 
 interface LiveCounterProps {
   value: number;
@@ -9,14 +9,14 @@ interface LiveCounterProps {
   suffix?: string;
 }
 
-export default function LiveCounter({ value, label, prefix = '', suffix = '' }: LiveCounterProps) {
+export function LiveCounter({ value, label, prefix = "", suffix = "" }: LiveCounterProps) {
   const [display, setDisplay] = useState(0);
   const prevRef = useRef(0);
 
   useEffect(() => {
     const start = prevRef.current;
     const end = value;
-    const duration = 600;
+    const duration = 800;
     const startTime = performance.now();
 
     function animate(now: number) {
@@ -32,11 +32,17 @@ export default function LiveCounter({ value, label, prefix = '', suffix = '' }: 
   }, [value]);
 
   return (
-    <div className="flex flex-col items-center gap-1">
-      <span className="text-[36px] font-light text-bone tracking-[-0.04em]">
-        {prefix}{display.toLocaleString()}{suffix}
+    <div className="flex flex-col gap-1">
+      <span className="text-[28px] font-light text-bone tracking-[-0.04em] tabular-nums">
+        {prefix}
+        {display.toLocaleString()}
+        {suffix}
       </span>
-      <span className="text-xs tracking-[0.05em] uppercase text-smoke">{label}</span>
+      <span className="text-[11px] font-medium tracking-[0.08em] uppercase text-smoke">
+        {label}
+      </span>
     </div>
   );
 }
+
+export default LiveCounter;
