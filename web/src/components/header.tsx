@@ -1,119 +1,177 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import { usePathname } from "next/navigation";
-import { useState, useEffect } from "react";
 import { ConnectButton } from "@rainbow-me/rainbowkit";
-import { List, X } from "@phosphor-icons/react";
+import { Shuffle } from "@/components/shuffle";
+import { MorphMenu } from "@/components/morph-menu";
 
 const NAV_LINKS = [
-  { href: "/tasks", label: "Tasks" },
-  { href: "/agents", label: "Agents" },
+  { href: "/markets", label: "Markets" },
+  { href: "/markets/create", label: "Create" },
   { href: "/leaderboard", label: "Leaderboard" },
+  { href: "/demo", label: "Demo" },
 ] as const;
+
+/** Toned-down wallet button — minimal hairline pill, no flashy gradient. */
+function WalletButton() {
+  return (
+    <ConnectButton.Custom>
+      {({
+        account,
+        chain,
+        openAccountModal,
+        openChainModal,
+        openConnectModal,
+        mounted,
+      }) => {
+        const ready = mounted;
+        const connected = ready && account && chain;
+        return (
+          <div
+            {...(!ready && {
+              "aria-hidden": true,
+              style: { opacity: 0, pointerEvents: "none", userSelect: "none" },
+            })}
+          >
+            {(() => {
+              if (!connected) {
+                return (
+                  <button
+                    onClick={openConnectModal}
+                    type="button"
+                    className="h-9 px-4 inline-flex items-center text-sm tracking-nav text-ash rounded-full border border-white/[0.10] bg-transparent transition-colors duration-200 hover:text-bone hover:border-white/20"
+                  >
+                    Connect Wallet
+                  </button>
+                );
+              }
+              if (chain.unsupported) {
+                return (
+                  <button
+                    onClick={openChainModal}
+                    type="button"
+                    className="h-9 px-4 inline-flex items-center text-sm tracking-nav text-swarm-fail rounded-full border border-hairline-fail bg-transparent transition-colors hover:bg-white/[0.04]"
+                  >
+                    Wrong network
+                  </button>
+                );
+              }
+              return (
+                <button
+                  onClick={openAccountModal}
+                  type="button"
+                  className="h-9 px-4 inline-flex items-center gap-2 text-sm tracking-nav text-ash rounded-full border border-white/[0.10] bg-transparent transition-colors duration-200 hover:text-bone hover:border-white/20"
+                >
+                  <span className="h-1.5 w-1.5 rounded-full bg-lichen" />
+                  {account.displayName}
+                </button>
+              );
+            })()}
+          </div>
+        );
+      }}
+    </ConnectButton.Custom>
+  );
+}
 
 export function Header() {
   const pathname = usePathname();
-  const [mobileOpen, setMobileOpen] = useState(false);
 
-  useEffect(() => {
-    setMobileOpen(false);
-  }, [pathname]);
-
+  // Match the most specific route first so /markets/create highlights
+  // "Create", not "Markets". Order matters: check create before markets.
   const isActive = (href: string) => {
-    if (href === "/tasks") return pathname.startsWith("/tasks");
-    if (href === "/agents") return pathname.startsWith("/agents");
+    if (href === "/markets/create") return pathname.startsWith("/markets/create");
+    if (href === "/markets")
+      return pathname.startsWith("/markets") && !pathname.startsWith("/markets/create");
     if (href === "/leaderboard") return pathname.startsWith("/leaderboard");
+    if (href === "/demo") return pathname.startsWith("/demo");
     return false;
   };
 
   return (
-    <header className="fixed top-0 left-0 right-0 z-50 h-16 bg-void/80 backdrop-blur-xl border-b border-white/[0.06]">
-      <nav className="mx-auto max-w-page px-6 h-full flex items-center justify-between">
+    <header className="fixed top-0 left-0 right-0 z-50 px-4 sm:px-6 pt-4">
+      <nav className="relative mx-auto max-w-page h-14 flex items-center justify-between rounded-full border border-white/[0.08] bg-void/70 backdrop-blur-xl pl-4 pr-2 sm:pl-5 sm:pr-2.5 shadow-[0_8px_32px_-12px_rgba(0,0,0,0.6)]">
         {/* Logo */}
-        <Link href="/" className="flex items-center gap-2.5 group" aria-label="HIVEMIND home">
-          <svg width="28" height="28" viewBox="0 0 28 28" className="text-plum-voltage transition-transform duration-300 group-hover:scale-110">
-            <circle cx="6" cy="8" r="2" fill="currentColor" />
-            <circle cx="14" cy="5" r="1.5" fill="currentColor" opacity="0.6" />
-            <circle cx="22" cy="10" r="2" fill="currentColor" />
-            <circle cx="10" cy="18" r="1.5" fill="currentColor" opacity="0.4" />
-            <circle cx="20" cy="20" r="2" fill="currentColor" opacity="0.7" />
-            <line x1="6" y1="8" x2="14" y2="5" stroke="currentColor" strokeWidth="0.5" opacity="0.4" />
-            <line x1="14" y1="5" x2="22" y2="10" stroke="currentColor" strokeWidth="0.5" opacity="0.4" />
-            <line x1="6" y1="8" x2="10" y2="18" stroke="currentColor" strokeWidth="0.5" opacity="0.3" />
-            <line x1="22" y1="10" x2="20" y2="20" stroke="currentColor" strokeWidth="0.5" opacity="0.3" />
-            <line x1="10" y1="18" x2="20" y2="20" stroke="currentColor" strokeWidth="0.5" opacity="0.2" />
-          </svg>
-          <span className="text-2xl-2 text-bone tracking-tight-display">
-            HIVEMIND
-          </span>
+        <Link
+          href="/"
+          className="flex items-center gap-2.5 group shrink-0"
+          aria-label="HIVEMIND home"
+        >
+          <Image
+            src="/logo.jpg"
+            alt="HIVEMIND"
+            width={28}
+            height={28}
+            priority
+            className="rounded-lg transition-transform duration-300 group-hover:scale-110"
+          />
+          <Shuffle
+            text="HIVEMIND"
+            className="text-xl text-bone tracking-tight-display"
+          />
         </Link>
 
-        {/* Desktop Nav */}
-        <div className="hidden md:flex items-center gap-8">
-          {NAV_LINKS.map((link) => (
-            <Link
-              key={link.href}
-              href={link.href}
-              className={`relative text-sm tracking-nav transition-colors duration-150 ${
-                isActive(link.href)
-                  ? "text-bone"
-                  : "text-smoke hover:text-bone"
-              }`}
-            >
-              {link.label}
-              {isActive(link.href) && (
-                <span className="absolute -bottom-[22px] left-1/2 -translate-x-1/2 w-6 h-[2px] bg-plum-voltage rounded-full" />
-              )}
-            </Link>
-          ))}
-        </div>
-
-        {/* Right: Wallet + Mobile Toggle */}
-        <div className="flex items-center gap-3">
-          <div className="hidden sm:block">
-            <ConnectButton
-              chainStatus="icon"
-              showBalance={false}
-              accountStatus="avatar"
-            />
+        {/* Right side — nav links + CTA grouped (desktop) */}
+        <div className="flex items-center gap-1 shrink-0">
+          {/* Nav links — desktop only (md+) */}
+          <div className="hidden md:flex items-center gap-1 mr-2">
+            {NAV_LINKS.map((link) => {
+              const active = isActive(link.href);
+              return (
+                <Link
+                  key={link.href}
+                  href={link.href}
+                  className={`px-3 py-1.5 rounded-full text-sm tracking-nav transition-colors duration-200 ${
+                    active
+                      ? "text-bone bg-white/[0.08]"
+                      : "text-ash hover:text-bone"
+                  }`}
+                >
+                  {link.label}
+                </Link>
+              );
+            })}
           </div>
-          <button
-            className="md:hidden text-bone p-2 -mr-2"
-            onClick={() => setMobileOpen(!mobileOpen)}
-            aria-label="Toggle menu"
-            aria-expanded={mobileOpen}
-          >
-            {mobileOpen ? <X size={24} weight="light" /> : <List size={24} weight="light" />}
-          </button>
+
+          {/* Wallet — desktop only (md+) */}
+          <div className="hidden md:block">
+            <WalletButton />
+          </div>
+
+          {/* Hamburger menu — mobile only (< md). Holds nav links + wallet. */}
+          <div className="md:hidden">
+            <MorphMenu panelClassName="w-56" ariaLabel="Open menu">
+              <div className="flex flex-col gap-1">
+                {NAV_LINKS.map((link) => {
+                  const active = isActive(link.href);
+                  return (
+                    <Link
+                      key={link.href}
+                      href={link.href}
+                      role="menuitem"
+                      className={`px-3 py-2 rounded-2xl text-base tracking-nav transition-colors ${
+                        active
+                          ? "text-bone bg-white/[0.06]"
+                          : "text-ash hover:text-bone hover:bg-white/[0.04]"
+                      }`}
+                    >
+                      {link.label}
+                    </Link>
+                  );
+                })}
+
+                {/* Wallet inside menu — the header wallet is hidden on mobile,
+                    so this is the only way to connect at this width. */}
+                <div className="mt-1 pt-3 border-t border-white/[0.06]">
+                  <WalletButton />
+                </div>
+              </div>
+            </MorphMenu>
+          </div>
         </div>
       </nav>
-
-      {/* Mobile Menu */}
-      {mobileOpen && (
-        <div className="md:hidden absolute top-16 left-0 right-0 bg-void/95 backdrop-blur-xl border-b border-white/[0.06] animate-fade-in">
-          <div className="px-6 py-6 flex flex-col gap-4">
-            {NAV_LINKS.map((link) => (
-              <Link
-                key={link.href}
-                href={link.href}
-                className={`text-base tracking-nav transition-colors ${
-                  isActive(link.href) ? "text-plum-voltage" : "text-ash hover:text-bone"
-                }`}
-              >
-                {link.label}
-              </Link>
-            ))}
-            <div className="pt-4 border-t border-white/[0.06]">
-              <ConnectButton
-                chainStatus="icon"
-                showBalance={false}
-                accountStatus="avatar"
-              />
-            </div>
-          </div>
-        </div>
-      )}
     </header>
   );
 }

@@ -1,0 +1,19 @@
+{
+  "name": "hivemind-agent-kit",
+  "version": "1.0.0",
+  "description": "Run a Hivemind AI agent on Ritual testnet — register, claim, submit, synthesize, earn",
+  "type": "module",
+  "scripts": {
+    "register": "node scripts/register.mjs",
+    "agent": "node scripts/agent.mjs",
+    "synthesize": "node scripts/synthesize.mjs",
+    "e2e": "node scripts/e2e.mjs"
+  },
+  "dependencies": {
+    "dotenv": "^16.4.5",
+    "viem": "^2.27.0"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}

@@ -13,6 +13,8 @@ interface TaskCardProps {
   deadline: bigint;
   status: number;
   claimedCount?: number;
+  /** Extra metadata from indexer (submissions, synthesis score, etc.) */
+  indexerMeta?: string;
 }
 
 export function TaskCard({
@@ -25,6 +27,7 @@ export function TaskCard({
   deadline,
   status,
   claimedCount = 0,
+  indexerMeta,
 }: TaskCardProps) {
   const isActive = status === 1;
   const isComplete = status === 3;
@@ -45,9 +48,14 @@ export function TaskCard({
       </div>
 
       {/* Task prompt */}
-      <p className="text-base text-bone leading-relaxed line-clamp-2 mb-4 group-hover:text-plum-voltage transition-colors duration-200">
+      <p className="text-base text-bone leading-relaxed line-clamp-2 mb-3 group-hover:text-plum-voltage transition-colors duration-200">
         {prompt}
       </p>
+
+      {/* Indexer metadata (synthesis score, etc) */}
+      {indexerMeta && (
+        <p className="text-xs text-smoke/60 mb-3 truncate">{indexerMeta}</p>
+      )}
 
       {/* Bottom row: agents + deadline */}
       <div className="flex items-center justify-between text-xs text-smoke tracking-body">

@@ -1,132 +1,221 @@
 "use client";
 
 import Link from "next/link";
+import { useState, useEffect } from "react";
+import { useReadContract } from "wagmi";
 import { Button } from "@/components/ui/button";
-import { LiveCounter } from "@/components/live-counter";
+import { MatchGrid } from "@/components/match-card";
+import type { MatchFixture } from "@/lib/fixtures";
+import {
+  PREDIX_MARKET_ADDRESS,
+  PREDIX_MARKET_ABI,
+} from "@/lib/predix-contracts";
 
 export default function LandingPage() {
+  // --- Live on-chain stats from PREDIX ---
+  const { data: marketCountData, isLoading: marketsLoading } = useReadContract({
+    address: PREDIX_MARKET_ADDRESS,
+    abi: PREDIX_MARKET_ABI,
+    functionName: "marketCount",
+  });
+
+  const { data: marketIdsData } = useReadContract({
+    address: PREDIX_MARKET_ADDRESS,
+    abi: PREDIX_MARKET_ABI,
+    functionName: "getMarketIds",
+  });
+
+  const totalMarkets = marketCountData ? Number(marketCountData) : 0;
+  const activeMarkets = marketIdsData ? marketIdsData.length : 0;
+
+  // Fetch World Cup matches
+  const [matches, setMatches] = useState<MatchFixture[]>([]);
+  const [matchesLoading_, setMatchesLoading] = useState(true);
+  useEffect(() => {
+    fetch("/api/fixtures")
+      .then((r) => r.json())
+      .then((d) => setMatches(d.matches ?? []))
+      .catch(() => {})
+      .finally(() => setMatchesLoading(false));
+  }, []);
+
   return (
     <div className="animate-page-in">
-      {/* ===== HERO — 50/50 split, min-h-screen ===== */}
-      <section className="min-h-screen flex items-center pt-16">
+      {/* ===== HERO (centered) ===== */}
+      <section className="min-h-screen flex items-center justify-center pt-16">
         <div className="mx-auto max-w-page px-6 w-full">
-          <div className="grid lg:grid-cols-2 gap-12 items-center">
-            {/* Left: Text Block */}
-            <div className="flex flex-col gap-6 max-w-[480px]">
-              {/* Eyebrow */}
-              <div className="flex items-center gap-2 text-xs-3 text-plum-voltage uppercase tracking-caps">
-                <span className="w-2 h-2 rounded-full bg-plum-voltage animate-pulse-dot" />
-                Live on Ritual Testnet
-              </div>
-
-              {/* Display headline — 78px weight 400 */}
-              <h1 className="text-display text-bone tracking-tight-display">
-                Collective intelligence, verified on-chain.
-              </h1>
-
-              {/* Body — 15px weight 400 */}
-              <p className="text-base text-ash leading-relaxed max-w-[440px]">
-                HIVEMIND is a decentralized swarm intelligence protocol where AI agents
-                collaborate to solve complex reasoning tasks. Every contribution is
-                verified through Ritual's TEE attestation — no trusted intermediaries,
-                just cryptographic proof.
-              </p>
-
-              {/* CTA Pills */}
-              <div className="flex flex-wrap gap-3 pt-2">
-                <Link href="/tasks/create">
-                  <Button variant="primary" size="lg">
-                    Create a Task
-                  </Button>
-                </Link>
-                <Link href="/tasks">
-                  <Button variant="outline" size="lg">
-                    Browse Swarms
-                  </Button>
-                </Link>
-              </div>
-
-              {/* Stats row */}
-              <div className="flex items-center gap-12 pt-6 mt-2 border-t border-white/[0.04]">
-                <LiveCounter value={0} label="Active Swarms" />
-                <LiveCounter value={0} label="Registered Agents" />
-                <LiveCounter value={0} label="Tasks Completed" />
-              </div>
+          <div className="flex flex-col items-center text-center gap-6 max-w-[760px] mx-auto">
+            {/* Eyebrow */}
+            <div className="flex items-center gap-2 text-xs-3 text-plum-voltage uppercase tracking-caps">
+              <span className="w-2 h-2 rounded-full bg-plum-voltage animate-pulse-dot" />
+              Live on Ritual Testnet
             </div>
 
-            {/* Right: Particle Constellation */}
-            <div className="relative h-[400px] lg:h-[560px] hidden lg:flex items-center justify-center">
-              <ConstellationVisual />
+            {/* Headline */}
+            <h1 className="text-display text-bone tracking-tight-display">
+              Bet on anything, on-chain.
+            </h1>
+
+            {/* Body */}
+            <p className="text-base text-ash leading-relaxed max-w-[560px]">
+              HIVEMIND is a decentralized prediction market on Ritual. Create markets,
+              bet on outcomes, and earn from correct predictions. Every trade is
+              on-chain, transparent, and censorship-resistant.
+            </p>
+
+            {/* CTA Pills */}
+            <div className="flex flex-wrap justify-center gap-3 pt-2">
+              <Link href="/markets/create">
+                <Button variant="primary" size="lg">
+                  Create a Market
+                </Button>
+              </Link>
+              <Link href="/markets">
+                <Button variant="outline" size="lg">
+                  Browse Markets
+                </Button>
+              </Link>
+            </div>
+
+            {/* Stats row — live from PREDIX contract */}
+            <div className="flex items-center justify-center gap-12 pt-6 mt-2 border-t border-white/[0.04]">
+              {marketsLoading ? (
+                <>
+                  <div className="flex flex-col gap-1 items-center">
+                    <div className="h-7 w-12 rounded skeleton" />
+                    <div className="h-3 w-20 rounded skeleton" />
+                  </div>
+                  <div className="flex flex-col gap-1 items-center">
+                    <div className="h-7 w-12 rounded skeleton" />
+                    <div className="h-3 w-24 rounded skeleton" />
+                  </div>
+                </>
+              ) : (
+                <>
+                  <div className="flex flex-col gap-1 items-center">
+                    <span className="text-2xl text-bone tabular-nums">{activeMarkets}</span>
+                    <span className="text-xs text-smoke">Active Markets</span>
+                  </div>
+                  <div className="flex flex-col gap-1 items-center">
+                    <span className="text-2xl text-bone tabular-nums">{totalMarkets}</span>
+                    <span className="text-xs text-smoke">Total Created</span>
+                  </div>
+                </>
+              )}
             </div>
           </div>
         </div>
       </section>
 
-      {/* ===== LIVE SWARM PREVIEW ===== */}
+      {/* ===== FEATURED CATEGORIES ===== */}
       <section className="py-60 border-t border-white/[0.04]">
         <div className="mx-auto max-w-page px-6">
-          <div className="flex items-center gap-3 mb-12">
-            <span className="w-2 h-2 rounded-full bg-lichen animate-pulse-dot" />
-            <span className="text-xs-3 text-smoke uppercase tracking-caps">
-              Live Activity
-            </span>
+          <div className="mb-12">
+            <h2 className="text-4xl text-bone tracking-tight-display mb-2">
+              Bet on what matters
+            </h2>
+            <p className="text-base text-ash">
+              Sports, crypto, politics, or your own custom question. If it has an outcome,
+              you can bet on it.
+            </p>
           </div>
 
-          <div className="grid md:grid-cols-3 gap-6">
-            <PreviewCard
-              title="Swarm Reasoning"
-              description="Multiple AI agents submit answers to the same prompt, then a synthesizer creates a consensus report with confidence scoring."
-              href="/tasks"
-              linkLabel="View Tasks"
+          <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            <CategoryCard
+              icon="⚽"
+              label="Sports"
+              description="World Cup, Champions League, UFC, and more"
+              href="/markets"
             />
-            <PreviewCard
-              title="TEE Verified"
-              description="Every agent submission is verified through Ritual's Trusted Execution Environment. Cryptographic proof, not trust."
-              href="#"
-              linkLabel="Learn More"
+            <CategoryCard
+              icon="📈"
+              label="Crypto"
+              description="BTC price milestones, token launches, TVL rankings"
+              href="/markets"
             />
-            <PreviewCard
-              title="On-Chain Bounties"
-              description="Task creators post bounties in ETH. Agents earn based on contribution quality, scored by the reputation system."
-              href="/leaderboard"
-              linkLabel="View Leaderboard"
+            <CategoryCard
+              icon="🗳️"
+              label="Politics"
+              description="Elections, regulations, policy outcomes"
+              href="/markets"
+            />
+            <CategoryCard
+              icon="🎯"
+              label="Custom"
+              description="Create your own market on any verifiable outcome"
+              href="/markets/create"
             />
           </div>
         </div>
       </section>
 
-      {/* ===== FEATURE GRID (2x2) ===== */}
+      {/* ===== WORLD CUP 2026 ===== */}
+      <section className="py-60 border-t border-white/[0.04]">
+        <div className="mx-auto max-w-page px-6">
+          <div className="flex items-center justify-between mb-8">
+            <div>
+              <div className="flex items-center gap-2 text-xs-3 text-amber-spark uppercase tracking-caps mb-2">
+                <span className="w-1.5 h-1.5 rounded-full bg-amber-spark" />
+                FIFA World Cup 2026
+              </div>
+              <h2 className="text-4xl text-bone tracking-tight-display">
+                Upcoming Matches
+              </h2>
+            </div>
+          </div>
+
+          {matchesLoading_ ? (
+            <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
+              {Array.from({ length: 6 }).map((_, i) => (
+                <div key={i} className="rounded-3xl border border-white/[0.08] p-5 h-56 animate-pulse" />
+              ))}
+            </div>
+          ) : (
+            <MatchGrid matches={matches.slice(0, 6)} />
+          )}
+
+          <div className="mt-6 text-center">
+            <Link href="/markets/create">
+              <Button variant="ghost" size="sm">
+                Create a custom market →
+              </Button>
+            </Link>
+          </div>
+        </div>
+      </section>
+
+      {/* ===== HOW IT WORKS ===== */}
       <section className="py-60 border-t border-white/[0.04]">
         <div className="mx-auto max-w-page px-6">
           <div className="mb-12">
             <h2 className="text-4xl text-bone tracking-tight-display">
-              How the swarm works
+              How it works
             </h2>
           </div>
 
           <div className="grid md:grid-cols-2 gap-6">
             <FeatureRow
               step="01"
-              title="Create a Task"
-              description="Submit a reasoning question with a bounty. Set minimum agents, deadline, and required submissions. The bounty is held in escrow."
-              href="/tasks/create"
+              title="Create a Market"
+              description="Define a question with two outcomes, set a deadline. Anyone can create a market — no approval needed."
+              href="/markets/create"
             />
             <FeatureRow
               step="02"
-              title="Agents Claim & Submit"
-              description="Registered AI agents claim the task and submit their answers with TEE attestation. Each submission is independently verified."
-              href="/agents"
+              title="Place Your Bet"
+              description="Buy shares on the outcome you believe will happen. Prices adjust dynamically based on supply and demand."
+              href="/markets"
             />
             <FeatureRow
               step="03"
-              title="Synthesis & Consensus"
-              description="A designated synthesizer aggregates all submissions into a consensus report with a confidence score. Dissenting opinions are preserved."
-              href="/tasks"
+              title="Trade or Hold"
+              description="Sell your position anytime before the market closes. Lock in profits or cut losses — it's your call."
+              href="/markets"
             />
             <FeatureRow
               step="04"
-              title="Reputation & Rewards"
-              description="Contributors earn reputation and bounty based on their submission quality. Top agents rise on the leaderboard."
+              title="Resolve & Claim"
+              description="When the deadline hits, the market resolves. Correct predictions earn payouts from the losing pool."
               href="/leaderboard"
             />
           </div>
@@ -141,43 +230,50 @@ export default function LandingPage() {
           </h2>
 
           <div className="flex flex-wrap items-center justify-center gap-4">
-            <TechBadge label="LLM Precompile" description="0x0802" />
-            <TechBadge label="HTTP Precompile" description="0x0801" />
-            <TechBadge label="TEE Attestation" description="Verified Execution" />
+            <TechBadge label="On-Chain" description="Chain 1979" />
+            <TechBadge label="Zero Oracle" description="Manual Resolve" />
+            <TechBadge label="Low Fees" description="RITUAL Gas" />
           </div>
 
           <p className="mt-10 text-base text-smoke max-w-[520px] mx-auto leading-relaxed">
-            Ritual is the first AI-native blockchain with built-in precompiles for
-            inference, HTTP requests, and verifiable compute. HIVEMIND runs entirely
-            on-chain — no off-chain oracles, no trusted servers.
+            HIVEMIND runs entirely on Ritual — an AI-native blockchain with built-in
+            precompiles for inference and verifiable compute. No off-chain oracles,
+            no trusted servers. Every bet is transparent and censorship-resistant.
           </p>
+
+          <div className="mt-8">
+            <Link href="/markets/create">
+              <Button variant="primary" size="lg">
+                Create your first market
+              </Button>
+            </Link>
+          </div>
         </div>
       </section>
     </div>
   );
 }
 
-function PreviewCard({
-  title,
+// ── Category Card ──
+function CategoryCard({
+  icon,
+  label,
   description,
   href,
-  linkLabel,
 }: {
-  title: string;
+  icon: string;
+  label: string;
   description: string;
   href: string;
-  linkLabel: string;
 }) {
   return (
     <Link
       href={href}
-      className="group block p-6 rounded-3xl border border-white/[0.08] hover:border-white/[0.12] hover:-translate-y-0.5 transition-all duration-200"
+      className="group flex flex-col gap-3 p-6 rounded-3xl border border-white/[0.08] hover:border-white/[0.12] hover:-translate-y-0.5 transition-all duration-200 card-glow"
     >
-      <h3 className="text-lg-2 text-bone mb-2">{title}</h3>
-      <p className="text-base text-ash leading-relaxed mb-4">{description}</p>
-      <span className="text-sm text-plum-voltage tracking-nav group-hover:underline">
-        {linkLabel} →
-      </span>
+      <span className="text-3xl">{icon}</span>
+      <h3 className="text-lg-2 text-bone">{label}</h3>
+      <p className="text-sm-2 text-smoke leading-relaxed">{description}</p>
     </Link>
   );
 }
@@ -196,7 +292,7 @@ function FeatureRow({
   return (
     <Link
       href={href}
-      className="group flex items-start gap-6 p-6 rounded-3xl border border-white/[0.08] hover:border-white/[0.12] hover:-translate-y-0.5 transition-all duration-200"
+      className="group flex items-start gap-6 p-6 rounded-3xl border border-white/[0.08] hover:border-white/[0.12] hover:-translate-y-0.5 transition-all duration-200 card-glow"
     >
       <div className="flex-1">
         <div className="flex items-baseline gap-3 mb-2">
@@ -218,89 +314,4 @@ function TechBadge({ label, description }: { label: string; description: string 
   );
 }
 
-function ConstellationVisual() {
-  // Dense constellation with glow
-  const nodes = [
-    { x: 120, y: 80, r: 4, c: "#8052ff", o: 0.95 },
-    { x: 250, y: 50, r: 3, c: "#8052ff", o: 0.6 },
-    { x: 380, y: 120, r: 4.5, c: "#8052ff", o: 0.9 },
-    { x: 180, y: 180, r: 3, c: "#ffb829", o: 0.5 },
-    { x: 320, y: 220, r: 4, c: "#8052ff", o: 0.85 },
-    { x: 80, y: 260, r: 2.5, c: "#15846e", o: 0.4 },
-    { x: 420, y: 280, r: 3, c: "#8052ff", o: 0.6 },
-    { x: 200, y: 340, r: 4, c: "#8052ff", o: 0.7 },
-    { x: 340, y: 380, r: 2.5, c: "#15846e", o: 0.45 },
-    { x: 140, y: 420, r: 3, c: "#8052ff", o: 0.55 },
-    { x: 280, y: 460, r: 4.5, c: "#8052ff", o: 0.9 },
-    { x: 400, y: 440, r: 2.5, c: "#ffb829", o: 0.4 },
-    { x: 60, y: 140, r: 2, c: "#ffffff", o: 0.3 },
-    { x: 460, y: 200, r: 2, c: "#ffffff", o: 0.2 },
-    { x: 120, y: 340, r: 2, c: "#8052ff", o: 0.25 },
-  ];
 
-  const connections = [
-    [0, 1], [1, 2], [0, 3], [3, 4], [2, 4], [0, 5], [5, 7], [4, 6], [6, 8],
-    [3, 7], [7, 9], [8, 10], [9, 10], [10, 11], [4, 8], [1, 3],
-    [0, 12], [2, 13], [7, 14], [12, 5], [13, 6],
-  ];
-
-  return (
-    <svg
-      viewBox="0 0 500 500"
-      className="w-full h-full max-w-[500px]"
-      style={{ filter: "drop-shadow(0 0 30px rgba(128,82,255,0.2))" }}
-    >
-      {/* Connection lines */}
-      {connections.map(([a, b], i) => {
-        const na = nodes[a];
-        const nb = nodes[b];
-        return (
-          <line
-            key={i}
-            x1={na.x}
-            y1={na.y}
-            x2={nb.x}
-            y2={nb.y}
-            stroke="#8052ff"
-            strokeWidth={0.6}
-            opacity={Math.min(na.o, nb.o) * 0.4}
-          />
-        );
-      })}
-
-      {/* Nodes with glow */}
-      {nodes.map((n, i) => (
-        <g key={i}>
-          {/* Outer glow */}
-          <circle
-            cx={n.x}
-            cy={n.y}
-            r={n.r * 4}
-            fill="none"
-            stroke={n.c}
-            strokeWidth={0.3}
-            opacity={n.o * 0.15}
-          />
-          {/* Mid glow */}
-          <circle
-            cx={n.x}
-            cy={n.y}
-            r={n.r * 2.5}
-            fill="none"
-            stroke={n.c}
-            strokeWidth={0.5}
-            opacity={n.o * 0.25}
-          />
-          {/* Core */}
-          <circle
-            cx={n.x}
-            cy={n.y}
-            r={n.r}
-            fill={n.c}
-            opacity={n.o}
-          />
-        </g>
-      ))}
-    </svg>
-  );
-}

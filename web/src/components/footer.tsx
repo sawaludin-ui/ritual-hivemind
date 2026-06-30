@@ -2,17 +2,17 @@ import Link from "next/link";
 
 const FOOTER_LINKS = [
   {
-    title: "Protocol",
+    title: "Markets",
     links: [
-      { label: "Tasks", href: "/tasks" },
-      { label: "Agents", href: "/agents" },
+      { label: "Browse Markets", href: "/markets" },
+      { label: "Create Market", href: "/markets/create" },
       { label: "Leaderboard", href: "/leaderboard" },
     ],
   },
   {
     title: "Resources",
     links: [
-      { label: "Docs", href: "#" },
+      { label: "Docs", href: "https://docs.ritual.net/" },
       { label: "GitHub", href: "https://github.com/sawaludin-ui/ritual-hivemind" },
       { label: "Ritual Network", href: "https://ritual.net" },
     ],
@@ -20,9 +20,9 @@ const FOOTER_LINKS = [
   {
     title: "Community",
     links: [
-      { label: "Discord", href: "#" },
-      { label: "Twitter", href: "#" },
-      { label: "Blog", href: "#" },
+      { label: "Discord", href: "https://discord.gg/ritualnet" },
+      { label: "Twitter", href: "https://twitter.com/ritual_net" },
+      { label: "Blog", href: "https://medium.com/@ritualnet" },
     ],
   },
 ] as const;
@@ -43,11 +43,11 @@ export function Footer() {
                 <line x1="14" y1="5" x2="22" y2="10" stroke="currentColor" strokeWidth="0.5" opacity="0.4" />
               </svg>
               <span className="text-2xl-2 text-bone tracking-tight-display">
-                HIVEMIND
+                PREDIX
               </span>
             </div>
             <p className="text-base text-smoke leading-relaxed max-w-[280px]">
-              Decentralized swarm intelligence on Ritual's verifiable compute network.
+              Decentralized prediction market on Ritual. Bet on anything, on-chain.
             </p>
           </div>
 
@@ -62,7 +62,7 @@ export function Footer() {
                   <li key={link.label}>
                     <Link
                       href={link.href}
-                      className="text-base text-ash hover:text-bone transition-colors duration-150"
+                      className="text-base text-ash hover:text-bone transition-colors duration-150 link-underline"
                     >
                       {link.label}
                     </Link>
@@ -79,7 +79,7 @@ export function Footer() {
             Built on Ritual · chainId 1979
           </p>
           <p className="text-xs text-smoke">
-            © 2026 HIVEMIND Protocol
+            © 2026 PREDIX
           </p>
         </div>
       </div>

@@ -5,26 +5,36 @@ import Link from "next/link";
 import { useReadContract } from "wagmi";
 import { Badge } from "@/components/ui/badge";
 import {
-  AGENT_REPUTATION_ADDRESS,
-  AGENT_REPUTATION_ABI,
-  HIVE_CORE_ADDRESS,
-  HIVE_CORE_ABI,
-} from "@/lib/contracts";
+  PREDIX_MARKET_ADDRESS,
+  PREDIX_MARKET_ABI,
+  MarketStatus,
+} from "@/lib/predix-contracts";
 import { truncateAddress } from "@/lib/utils";
-import { Trophy, ArrowsDownUp } from "@phosphor-icons/react";
+import {
+  Trophy,
+  ArrowsDownUp,
+  Medal,
+  WifiSlash,
+  ChartBar,
+  Lightning,
+} from "@phosphor-icons/react";
 
-type SortKey = "reputation" | "tasksCompleted" | "totalEarned";
+type SortKey = "volume" | "bettors" | "resolved";
 
 export default function LeaderboardPage() {
-  const [sortKey, setSortKey] = useState<SortKey>("reputation");
+  const [sortKey, setSortKey] = useState<SortKey>("volume");
 
-  const { data: knownAgents, isLoading } = useReadContract({
-    address: AGENT_REPUTATION_ADDRESS,
-    abi: AGENT_REPUTATION_ABI,
-    functionName: "knownAgents",
+  const {
+    data: marketIds,
+    isLoading,
+    isError,
+  } = useReadContract({
+    address: PREDIX_MARKET_ADDRESS,
+    abi: PREDIX_MARKET_ABI,
+    functionName: "getMarketIds",
   });
 
-  const agentsList = (knownAgents ?? []) as readonly string[];
+  const ids = marketIds ?? [];
 
   return (
     <div className="pt-16 animate-page-in">
@@ -35,11 +45,9 @@ export default function LeaderboardPage() {
             <Trophy size={14} weight="light" />
             Rankings
           </div>
-          <h1 className="text-4xl text-bone tracking-tight-display">
-            Leaderboard
-          </h1>
+          <h1 className="text-4xl text-bone tracking-tight-display">Leaderboard</h1>
           <p className="text-base text-ash mt-1">
-            Top-performing agents ranked by reputation, tasks completed, and earnings
+            Top markets by volume, bettor count, and resolution status
           </p>
         </div>
 
@@ -48,9 +56,9 @@ export default function LeaderboardPage() {
           <ArrowsDownUp size={14} weight="light" className="text-smoke" />
           <span className="text-xs-3 text-smoke uppercase tracking-caps mr-2">Sort by</span>
           {([
-            ["reputation", "Reputation"],
-            ["tasksCompleted", "Tasks Done"],
-            ["totalEarned", "Earnings"],
+            ["volume", "Volume"],
+            ["bettors", "Bettors"],
+            ["resolved", "Resolved"],
           ] as const).map(([key, label]) => (
             <button
               key={key}
@@ -70,51 +78,67 @@ export default function LeaderboardPage() {
         {isLoading && (
           <div className="space-y-3">
             {Array.from({ length: 8 }).map((_, i) => (
-              <div key={i} className="flex items-center gap-4 p-4 rounded-3xl border border-white/[0.08]">
+              <div
+                key={i}
+                className="flex items-center gap-4 p-4 rounded-3xl border border-white/[0.08] animate-pulse"
+              >
                 <div className="w-8 h-8 rounded-full skeleton" />
                 <div className="flex-1">
-                  <div className="h-5 w-32 rounded skeleton mb-2" />
+                  <div className="h-5 w-48 rounded skeleton mb-2" />
                   <div className="h-3 w-24 rounded skeleton" />
                 </div>
-                <div className="h-5 w-16 rounded skeleton" />
+                <div className="h-5 w-20 rounded skeleton" />
               </div>
             ))}
           </div>
         )}
 
-        {/* Empty state */}
-        {!isLoading && agentsList.length === 0 && (
-          <div className="flex flex-col items-center justify-center py-120 text-center">
+        {/* Error */}
+        {isError && (
+          <div className="flex flex-col items-center justify-center py-24 text-center">
+            <div className="w-16 h-16 mx-auto mb-4 rounded-full border border-swarm-fail/10 flex items-center justify-center">
+              <WifiSlash size={28} weight="light" className="text-smoke/50" />
+            </div>
+            <p className="text-base text-smoke">Unable to load leaderboard.</p>
+          </div>
+        )}
+
+        {/* Empty */}
+        {!isLoading && !isError && ids.length === 0 && (
+          <div className="flex flex-col items-center justify-center py-24 text-center">
             <div className="w-20 h-20 mx-auto mb-6 rounded-full border border-white/[0.08] flex items-center justify-center">
               <Trophy size={32} weight="light" className="text-smoke" />
             </div>
-            <h3 className="text-2xl-2 text-bone mb-2">No agents on the leaderboard yet</h3>
+            <h3 className="text-2xl text-bone mb-2">No markets yet</h3>
             <p className="text-base text-ash max-w-[360px] mb-6 leading-relaxed">
-              Once agents start completing tasks, they'll appear here ranked by
-              reputation, earnings, and contribution quality.
+              Once markets are created and bets are placed, top markets will appear
+              here ranked by volume and bettor activity.
             </p>
-            <Link href="/agents/register" className="text-sm text-plum-voltage tracking-nav hover:underline">
-              Register the first agent →
+            <Link
+              href="/markets/create"
+              className="text-sm text-plum-voltage tracking-nav hover:underline"
+            >
+              Create the first market →
             </Link>
           </div>
         )}
 
-        {/* Leaderboard rows */}
-        {!isLoading && agentsList.length > 0 && (
+        {/* Market rows */}
+        {!isLoading && !isError && ids.length > 0 && (
           <div className="flex flex-col gap-2">
             {/* Header row */}
-            <div className="hidden sm:grid grid-cols-[40px_1fr_120px_120px_120px] gap-4 px-4 pb-2 border-b border-white/[0.04]">
+            <div className="hidden sm:grid grid-cols-[48px_1fr_140px_120px_100px] gap-4 px-4 pb-2 border-b border-white/[0.04]">
               <span className="text-xs-3 text-smoke uppercase tracking-caps">#</span>
-              <span className="text-xs-3 text-smoke uppercase tracking-caps">Agent</span>
-              <span className="text-xs-3 text-smoke uppercase tracking-caps text-right">Reputation</span>
-              <span className="text-xs-3 text-smoke uppercase tracking-caps text-right">Tasks</span>
-              <span className="text-xs-3 text-smoke uppercase tracking-caps text-right">Earned</span>
+              <span className="text-xs-3 text-smoke uppercase tracking-caps">Market</span>
+              <span className="text-xs-3 text-smoke uppercase tracking-caps text-right">Volume</span>
+              <span className="text-xs-3 text-smoke uppercase tracking-caps text-right">Bettors</span>
+              <span className="text-xs-3 text-smoke uppercase tracking-caps text-right">Status</span>
             </div>
 
-            {agentsList.map((agentAddr, index) => (
+            {ids.map((id, index) => (
               <LeaderboardRow
-                key={agentAddr}
-                address={agentAddr}
+                key={id}
+                id={id}
                 rank={index + 1}
                 sortKey={sortKey}
               />
@@ -127,75 +151,110 @@ export default function LeaderboardPage() {
 }
 
 function LeaderboardRow({
-  address, rank, sortKey,
+  id,
+  rank,
+  sortKey,
 }: {
-  address: string;
+  id: bigint;
   rank: number;
   sortKey: SortKey;
 }) {
-  const { data: agent } = useReadContract({
-    address: HIVE_CORE_ADDRESS,
-    abi: HIVE_CORE_ABI,
-    functionName: "getAgent",
-    args: [address as `0x${string}`],
+  const { data: market } = useReadContract({
+    address: PREDIX_MARKET_ADDRESS,
+    abi: PREDIX_MARKET_ABI,
+    functionName: "getMarket",
+    args: [id],
   });
 
-  const { data: totals } = useReadContract({
-    address: AGENT_REPUTATION_ADDRESS,
-    abi: AGENT_REPUTATION_ABI,
-    functionName: "getAgentTotals",
-    args: [address as `0x${string}`],
+  const { data: bettorCount } = useReadContract({
+    address: PREDIX_MARKET_ADDRESS,
+    abi: PREDIX_MARKET_ABI,
+    functionName: "getBettorCount",
+    args: [id],
   });
 
-  if (!agent || !agent[6]) return null;
+  if (!market) return null;
 
-  const name = agent[1];
-  const reputation = totals ? totals[0] : agent[3];
-  const tasksCompleted = totals ? Number(totals[1]) : Number(agent[4]);
-  const totalEarned = totals ? totals[2] : agent[5];
-  const earnedDisplay = (Number(totalEarned) / 1e18).toFixed(4);
+  const volume = (market.stakedA + market.stakedB) / 10n ** 18n;
+  const volumeDisplay = Number(volume).toFixed(4);
+  const bettors = bettorCount ? Number(bettorCount) : 0;
+  const status = Number(market.status);
+  const isResolved = status === MarketStatus.Resolved;
 
-  const isTop3 = rank <= 3;
-  const rankColor = rank === 1 ? "text-amber-spark" : rank === 2 ? "text-ash" : rank === 3 ? "text-plum-voltage" : "text-smoke";
+  const rankColor =
+    rank === 1
+      ? "text-amber-spark"
+      : rank === 2
+        ? "text-ash"
+        : rank === 3
+          ? "text-plum-voltage"
+          : "text-smoke";
 
   return (
     <Link
-      href={`/agents/${address}`}
-      className={`group grid grid-cols-[40px_1fr_120px_120px_120px] gap-4 items-center px-4 py-4 rounded-3xl transition-all duration-200 ${
-        isTop3
+      href={`/markets/${id}`}
+      className={`group grid grid-cols-[48px_1fr_140px_120px_100px] gap-4 items-center px-4 py-4 rounded-3xl transition-all duration-200 ${
+        rank <= 3
           ? "border border-white/[0.08] hover:border-white/[0.12]"
           : "border border-transparent hover:border-white/[0.08]"
       }`}
     >
-      <span className={`text-lg text-bone tracking-tight-display ${rankColor}`}>{rank}</span>
+      {/* Rank */}
+      <span className={`text-lg text-bone tracking-tight-display ${rankColor}`}>
+        {rank}
+      </span>
 
+      {/* Market question */}
       <div className="flex items-center gap-3 min-w-0">
-        <svg width="24" height="24" viewBox="0 0 28 28" className="text-plum-voltage flex-shrink-0">
-          <circle cx="6" cy="8" r="2" fill="currentColor" />
-          <circle cx="14" cy="5" r="1.5" fill="currentColor" opacity="0.6" />
-          <circle cx="22" cy="10" r="2" fill="currentColor" />
-          <line x1="6" y1="8" x2="14" y2="5" stroke="currentColor" strokeWidth="0.5" opacity="0.4" />
-          <line x1="14" y1="5" x2="22" y2="10" stroke="currentColor" strokeWidth="0.5" opacity="0.4" />
-        </svg>
+        <div className="w-8 h-8 rounded-full bg-plum-voltage/10 border border-plum-voltage/20 flex items-center justify-center shrink-0">
+          <ChartBar size={16} weight="light" className="text-plum-voltage" />
+        </div>
         <div className="min-w-0">
-          <p className="text-lg-2 text-bone group-hover:text-plum-voltage transition-colors truncate">
-            {name}
+          <p className="text-base text-bone group-hover:text-plum-voltage transition-colors truncate">
+            {market.question}
           </p>
           <p className="text-xs text-smoke tracking-body truncate">
-            {truncateAddress(address)}
+            {market.optionA} vs {market.optionB}
           </p>
         </div>
       </div>
 
-      <span className={`text-right tracking-body text-base ${sortKey === "reputation" ? "text-bone" : "text-ash"}`}>
-        {reputation.toString()}
+      {/* Volume */}
+      <span
+        className={`text-right tracking-body text-base tabular-nums ${
+          sortKey === "volume" ? "text-bone" : "text-ash"
+        }`}
+      >
+        {volumeDisplay} RITUAL
       </span>
-      <span className={`text-right tracking-body text-base ${sortKey === "tasksCompleted" ? "text-bone" : "text-ash"}`}>
-        {tasksCompleted}
+
+      {/* Bettors */}
+      <span
+        className={`text-right tracking-body text-base tabular-nums ${
+          sortKey === "bettors" ? "text-bone" : "text-ash"
+        }`}
+      >
+        {bettors}
       </span>
-      <span className={`text-right tracking-body text-base ${sortKey === "totalEarned" ? "text-bounty" : "text-ash"}`}>
-        {earnedDisplay}
-      </span>
+
+      {/* Status */}
+      <div className="text-right">
+        {status === MarketStatus.Active && (
+          <span className="inline-flex items-center gap-1 text-xs text-lichen">
+            <Lightning size={10} weight="fill" />
+            Active
+          </span>
+        )}
+        {status === MarketStatus.Resolved && (
+          <Badge variant="gold">Resolved</Badge>
+        )}
+        {status === MarketStatus.Closed && (
+          <span className="text-xs text-amber-spark">Closed</span>
+        )}
+        {status === MarketStatus.Cancelled && (
+          <span className="text-xs text-swarm-fail">Cancelled</span>
+        )}
+      </div>
     </Link>
   );
 }

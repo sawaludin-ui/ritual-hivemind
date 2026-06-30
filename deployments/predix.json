@@ -1,0 +1,11 @@
+{
+  "chainId": "1979",
+  "deployedAt": "2026-06-30T10:24:33.099Z",
+  "deployer": "0x04e276CFaFF694424Fc55327c5FbE7f7FEFD12fE",
+  "feeCollector": "0x04e276CFaFF694424Fc55327c5FbE7f7FEFD12fE",
+  "predictionMarket": "0xf122fcaed28155c3f8730e02787d802e97ecdb57",
+  "betFeeBps": "200",
+  "exitFeeBps": "100",
+  "deployTx": "0x179d15008268ab600e8210cd5f5e856bf244c2cce752ac62a23a4ef571459cd1",
+  "explorerUrl": "https://explorer.ritualfoundation.org/"
+}

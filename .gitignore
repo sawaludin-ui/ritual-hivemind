@@ -20,8 +20,31 @@ scripts/test-hre.ts
 deployments/local-*.json
 !deployments/ritual.json
 
-# Env
+# Env (all variants)
 .env
+.env.*
+!.env.example
+web/.env
+web/.env.*
+!web/.env.example
+
+# Logs
+*.log
+backend-dev.err.log
+backend-dev.out.log
+backend-live.err.log
+backend-live.out.log
+web/dev-stderr.log
+web/dev-stdout.log
+
+# Temp files
+_tmp_*.txt
+_test.html
+_check*.mjs
+
+# Screenshots / preview images (keep public/ assets, ignore root pngs)
+/web/*.png
+/web/screenshot-*.png
 
 # OS
 Thumbs.db

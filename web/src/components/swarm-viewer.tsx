@@ -57,10 +57,11 @@ export function SwarmViewer({
     let raf = 0;
     const rand = seeded(seed);
     const dpr = Math.min(window.devicePixelRatio || 1, 2);
-    const isMobile = window.innerWidth < 768;
+    let isMobile = window.innerWidth < 768;
 
     function resize() {
       if (!canvas || !ctx) return;
+      isMobile = window.innerWidth < 768;
       const rect = canvas.getBoundingClientRect();
       canvas.width = Math.round(rect.width * dpr);
       canvas.height = Math.round(rect.height * dpr);
@@ -206,9 +207,9 @@ export function SwarmViewer({
 
   return (
     <section className="relative overflow-hidden rounded-3xl border border-white/[0.08] bg-[radial-gradient(circle_at_center,rgba(128,82,255,0.10),rgba(0,0,0,0.92)_42%)]">
-      <div className="grid lg:grid-cols-[260px_1fr_280px] gap-0 min-h-[560px]">
+      <div className="grid lg:grid-cols-[260px_1fr_280px] gap-0 min-h-[420px] lg:min-h-[560px]">
         {/* Left: Agent List */}
-        <aside className="relative p-6 border-b lg:border-b-0 lg:border-r border-white/[0.05]">
+        <aside className="relative p-4 lg:p-6 border-b lg:border-b-0 lg:border-r border-white/[0.05]">
           <div className="mb-6">
             <p className="text-xs-3 text-smoke uppercase tracking-caps">
               Swarm
@@ -279,7 +280,7 @@ export function SwarmViewer({
             aria-label="Swarm constellation"
           />
           {/* Prompt overlay */}
-          <div className="absolute left-6 top-6 rounded-3xl border border-white/[0.08] bg-black/30 px-4 py-3 backdrop-blur-md max-w-[540px]">
+          <div className="absolute left-3 top-3 lg:left-6 lg:top-6 rounded-2xl lg:rounded-3xl border border-white/[0.08] bg-black/30 px-3 py-2 lg:px-4 lg:py-3 backdrop-blur-md max-w-[calc(100%-1.5rem)] lg:max-w-[540px]">
             <p className="text-xs-3 text-smoke uppercase tracking-caps">
               Prompt
             </p>
@@ -288,7 +289,7 @@ export function SwarmViewer({
         </div>
 
         {/* Right: Task Pulse */}
-        <aside className="relative p-6 border-t lg:border-t-0 lg:border-l border-white/[0.05]">
+        <aside className="relative p-4 lg:p-6 border-t lg:border-t-0 lg:border-l border-white/[0.05]">
           <p className="text-xs-3 text-smoke uppercase tracking-caps">
             Task Pulse
           </p>
